@@ -301,6 +301,7 @@ class Context_Guided_Network(nn.Module):
 		  N: the number of blocks in stage 3
 		"""
 		super().__init__()
+		self.sigmoid = nn.Sigmoid()
 		self.level1_0 = ConvBNPReLU(3, 32, 3, 2)  # feature map size divided 2, 1/2
 		self.level1_1 = ConvBNPReLU(32, 32, 3, 1)
 		self.level1_2 = ConvBNPReLU(32, 32, 3, 1)
@@ -382,4 +383,5 @@ class Context_Guided_Network(nn.Module):
 
 		# upsample segmenation map ---> the input image size
 		out = F.upsample(classifier, input.size()[2:], mode='bilinear', align_corners=False)  # Upsample score map, factor=8
+		out = self.sigmoid(out)
 		return out

@@ -44,6 +44,7 @@ class UNet_new(nn.Module):
         self.conv0_4 = VGGBlock(nb_filter[0]+nb_filter[1], nb_filter[0], nb_filter[0])
 
         self.final = nn.Conv2d(nb_filter[0], num_classes, kernel_size=1)
+        self.sigmoid = nn.Sigmoid()
 
 
     def forward(self, input):
@@ -59,6 +60,7 @@ class UNet_new(nn.Module):
         x0_4 = self.conv0_4(torch.cat([x0_0, self.up(x1_3)], 1))
 
         output = self.final(x0_4)
+        output = self.sigmoid(output)
         return output
 
 
@@ -101,6 +103,8 @@ class NestedUNet(nn.Module):
         else:
             self.final = nn.Conv2d(nb_filter[0], num_classes, kernel_size=1)
 
+        self.sigmoid = nn.Sigmoid()
+
 
     def forward(self, input):
         x0_0 = self.conv0_0(input)
@@ -131,4 +135,5 @@ class NestedUNet(nn.Module):
 
         else:
             output = self.final(x0_4)
+            output = self.sigmoid(output)
             return output
