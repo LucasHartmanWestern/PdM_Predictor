@@ -1,0 +1,3 @@
+python 2A_detection/train.py -mn new_unet -rs n
+python 2A_detection/train.py -mn nested_unet -rs n
+python 2A_detection/train.py -mn cgnet -rs n

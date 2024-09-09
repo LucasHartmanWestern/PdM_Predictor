@@ -1,0 +1,9 @@
+# basics
+.idea/
+**/.DS_Store
+**/__pycache__/
+
+# large files
+1B_synthetic_rain/image_files/
+1B_synthetic_rain/output_samples/
+experiments/

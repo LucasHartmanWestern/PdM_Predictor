@@ -1,0 +1,129 @@
+/usr/bin/python3 /Users/nick_1/PycharmProjects/Western Summer Research/CoolingTowerSyntheticDataGenerator/synthetic_data_generator/reformat_src_data.py
+Copying images: 100%|██████████| 76/76 [00:04<00:00, 15.57it/s]
+Could not find these specific files:
+	2024_06_20_2pm_snapshot_1.png
+	2024_06_20_3pm_snapshot_1.png
+	2024_06_20_4pm_snapshot_1.png
+	2024_06_20_5pm_snapshot_1.png
+	2024_06_20_6pm_snapshot_1.png
+	2024_06_20_7pm_snapshot_1.png
+	2024_06_20_8pm_snapshot_1.png
+
+	* all of 06_21 to 06_24 *
+
+	2024_06_25_8am_snapshot_1.png
+	2024_06_25_9am_snapshot_1.png
+	2024_06_25_10am_snapshot_1.png
+	2024_06_25_11am_snapshot_1.png
+	2024_06_25_12pm_snapshot_1.png
+	2024_06_25_1pm_snapshot_1.png
+	2024_06_25_2pm_snapshot_1.png
+	2024_06_25_3pm_snapshot_1.png
+	2024_06_25_4pm_snapshot_1.png
+
+	2024_06_26_4pm_snapshot_1.png
+
+	2024_06_28_12pm_snapshot_1.png
+	2024_06_28_1pm_snapshot_1.png
+	2024_06_28_2pm_snapshot_1.png
+	2024_06_28_3pm_snapshot_1.png
+	2024_06_28_4pm_snapshot_1.png
+	2024_06_28_5pm_snapshot_1.png
+	2024_06_28_6pm_snapshot_1.png
+	2024_06_28_7pm_snapshot_1.png
+	2024_06_28_8pm_snapshot_1.png
+
+	2024_06_29_10am_snapshot_1.png
+
+	2024_07_03_8am_snapshot_1.png
+
+	2024_07_05_8am_snapshot_1.png
+
+	2024_07_07_11am_snapshot_1.png
+	2024_07_07_12pm_snapshot_1.png
+	2024_07_07_2pm_snapshot_1.png
+	2024_07_07_3pm_snapshot_1.png
+	2024_07_07_5pm_snapshot_1.png
+	2024_07_07_6pm_snapshot_1.png
+	2024_07_07_7pm_snapshot_1.png
+	2024_07_07_8pm_snapshot_1.png
+
+	2024_07_09_8am_snapshot_1.png
+	2024_07_09_7pm_snapshot_1.png
+	2024_07_09_8pm_snapshot_1.png
+
+	2024_07_10_9am_snapshot_1.png
+	2024_07_10_10am_snapshot_1.png
+	2024_07_10_11am_snapshot_1.png
+	2024_07_10_12pm_snapshot_1.png
+	2024_07_10_2pm_snapshot_1.png
+
+	2024_07_11_6pm_snapshot_1.png
+
+	2024_07_13_12pm_snapshot_1.png
+
+	2024_07_15_8pm_snapshot_1.png
+
+	2024_07_18_10am_snapshot_1.png
+	2024_07_18_2pm_snapshot_1.png
+
+	2024_07_20_9am_snapshot_1.png
+	2024_07_20_10am_snapshot_1.png
+	2024_07_20_11am_snapshot_1.png
+	2024_07_20_12pm_snapshot_1.png
+	2024_07_20_1pm_snapshot_1.png
+	2024_07_20_2pm_snapshot_1.png
+	2024_07_20_3pm_snapshot_1.png
+	2024_07_20_5pm_snapshot_1.png
+	2024_07_20_6pm_snapshot_1.png
+	2024_07_20_7pm_snapshot_1.png
+	2024_07_20_8pm_snapshot_1.png
+
+	2024_07_21_8am_snapshot_1.png
+	2024_07_21_9am_snapshot_1.png
+	2024_07_21_10am_snapshot_1.png
+	2024_07_21_11am_snapshot_1.png
+	2024_07_21_12pm_snapshot_1.png
+	2024_07_21_3pm_snapshot_1.png
+	2024_07_21_5pm_snapshot_1.png
+
+	2024_07_25_12pm_snapshot_1.png
+	2024_07_25_1pm_snapshot_1.png
+	2024_07_25_3pm_snapshot_1.png
+
+	2024_07_26_3pm_snapshot_1.png
+
+	2024_08_12_5pm_snapshot_1.png
+
+	2024_08_15_8pm_snapshot_1.png
+
+	* all of 08_16 to 08_19 *
+
+	2024_08_20_8am_snapshot_1.png
+	2024_08_20_9am_snapshot_1.png
+
+	2024_08_24_8am_snapshot_1.png
+
+	2024_08_25_3pm_snapshot_1.png
+
+	2024_08_26_8am_snapshot_1.png
+	2024_08_26_9am_snapshot_1.png
+	2024_08_26_10am_snapshot_1.png
+	2024_08_26_3pm_snapshot_1.png
+	2024_08_26_7pm_snapshot_1.png
+	2024_08_26_8pm_snapshot_1.png
+
+	2024_08_27_8am_snapshot_1.png
+	2024_08_27_5pm_snapshot_1.png
+
+0 files were found for these dates:
+	2024_06_21
+	2024_06_22
+	2024_06_23
+	2024_06_24
+	2024_08_16
+	2024_08_17
+	2024_08_18
+	2024_08_19
+
+Process finished with exit code 0
