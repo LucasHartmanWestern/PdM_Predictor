@@ -102,8 +102,8 @@ if __name__ == '__main__':
     parser.add_argument('-mn', type=str, help='model name', required=True)
     parser.add_argument('-rs', type=str, help='random seed (y/n)', required=True)
     args = parser.parse_args()
-    assert args.mn in ['new_unet', 'nested_unet', 'cgnet', 'plain_unet'], print('ERROR: incorrect mn input')
-    assert args.rs in ['y', 'n'], print('ERROR: incorrect rs input')
+    assert args.mn in ['new_unet', 'nested_unet', 'cgnet', 'plain_unet'], 'ERROR: incorrect mn input'
+    assert args.rs in ['y', 'n'], 'ERROR: incorrect rs input'
 
     # hyperparameters
     n_epochs = 100  # num of epochs
