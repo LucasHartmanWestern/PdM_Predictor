@@ -1,8 +1,8 @@
 from torchsummary import summary
 
-from architectures.plain_unet import UNet
-from architectures.nested_unet import UNet_new, NestedUNet
-from architectures.cgnet import Context_Guided_Network
+from plain_unet import UNet
+from nested_unet import UNet_new, NestedUNet
+from cgnet import Context_Guided_Network
 
 
 if __name__ == '__main__':

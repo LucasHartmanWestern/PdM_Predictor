@@ -1,3 +1,4 @@
+import argparse
 import csv
 import os
 from datetime import datetime
@@ -12,7 +13,9 @@ from tqdm import tqdm
 
 from utils.log_util import setup_basic_logger, log_and_print, print_hyperparams
 from custom_ds import SMSTestDS
-from unet_model import UNet
+from architectures.nested_unet import UNet_new, NestedUNet
+from architectures.plain_unet import UNet
+from architectures.cgnet import Context_Guided_Network
 
 
 def make_scenario_csvs(data):
@@ -60,7 +63,7 @@ def print_hist(metric_vals, metric_name):
 
 
 def test(model, test_loader, device):
-    global model_version, save_path
+    global save_path
 
     prev_day = 1
     curr_scenario = 0
@@ -115,21 +118,28 @@ def test(model, test_loader, device):
 
 
 if __name__ == '__main__':
+    # parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-mn', type=str, help='model name', required=True)
+    args = parser.parse_args()
+
     # hyperparameters
-    model_version = 3
     input_shape = (512, 512)
     dataset_name = 'sm_SMS_ds'
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # set up paths and directories
-    save_path = os.path.join('.', 'model_{}'.format(model_version))
+    base_path = os.path.join('.', 'experiments', args.mn)
+    assert os.path.exists(base_path), 'ERROR: directory does not exist: {}'.format(base_path)
+    save_path = os.path.join(base_path, 'testing')
+    os.makedirs(save_path, exist_ok=True)
 
     # set up logger and deterministic seed
     setup_basic_logger(os.path.join(save_path, 'testing.log'))
 
     # print training hyperparameters
     print_hyperparams(
-        model_ver=model_version, input_shape=input_shape, dataset_name=dataset_name, device=device
+        model_name=args.mn, input_shape=input_shape, dataset_name=dataset_name, device=device
     )
 
     # set up dataset(s)
@@ -137,8 +147,15 @@ if __name__ == '__main__':
     test_loader = DataLoader(test_ds, batch_size=1, shuffle=False)
 
     # compile model
-    model = UNet()
-    weights_file = os.path.join(save_path, 'best_weights.pth')
+    if args.mn == 'new_unet':
+        model = UNet_new()
+    elif args.mn == 'nested_unet':
+        model = NestedUNet()
+    elif args.mn == 'cgnet':
+        model = Context_Guided_Network()
+    else:
+        model = UNet()
+    weights_file = os.path.join(base_path, 'training', 'best_weights.pth')
     model.load_state_dict(torch.load(weights_file, map_location=device, weights_only=True))
     model.to(device=device)
 

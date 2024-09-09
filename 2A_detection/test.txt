@@ -1,0 +1,4 @@
+python test_SMS.py -mn new_unet
+python test_SMS.py -mn nested_unet
+python test_SMS.py -mn cgnet
+python test_SMS.py -mn plain_unet

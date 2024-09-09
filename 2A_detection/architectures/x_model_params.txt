@@ -1,0 +1,4 @@
+Old UNet = 31,037,633 params
+New UNet = 7,852,545 params
+Nested UNet = 9,163,329 params
+CGNet = 491,698 params
