@@ -1,6 +1,6 @@
 from torch import nn
 
-from model_parts.unet_parts import DoubleConv, Down, Up, OutConv
+from architectures.model_parts.unet_parts import DoubleConv, Down, Up, OutConv
 
 
 # Based on code obtained from:
