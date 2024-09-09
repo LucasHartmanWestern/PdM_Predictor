@@ -121,7 +121,7 @@ if __name__ == '__main__':
 
     # set up logger and deterministic seed
     setup_basic_logger(os.path.join(save_path, 'training.log'))  # initialize logger
-    seed = 987654321 if args.rs == 'y' else get_random_seed()
+    seed = 987654321 if args.rs == 'n' else get_random_seed()
     make_deterministic(seed)  # set deterministic seed
 
     # print training hyperparameters

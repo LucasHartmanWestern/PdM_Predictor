@@ -1,0 +1,1 @@
+python train.py -mn og_unet -rs n

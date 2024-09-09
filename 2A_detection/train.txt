@@ -1,0 +1,3 @@
+python train.py -mn new_unet -rs n
+python train.py -mn nested_unet -rs n
+python train.py -mn cgnet -rs n
