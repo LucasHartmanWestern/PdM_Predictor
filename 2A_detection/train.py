@@ -104,9 +104,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     assert args.mn in ['new_unet', 'nested_unet', 'cgnet', 'plain_unet'], print('ERROR: incorrect mn input')
     assert args.rs in ['y', 'n'], print('ERROR: incorrect rs input')
-    print(args.mn)
-    print(args.rs)
-    quit()
 
     # hyperparameters
     n_epochs = 100  # num of epochs
