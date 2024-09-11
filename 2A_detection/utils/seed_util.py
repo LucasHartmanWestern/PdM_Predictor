@@ -21,7 +21,7 @@ def get_random_seed():
 def make_deterministic(seed):
     torch.backends.cudnn.benchmark = False
     torch.backends.cudnn.deterministic = True
-    torch.use_deterministic_algorithms(mode=True, warn_only=True)
+    torch.use_deterministic_algorithms(True)
     os.environ['PYTHONHASHSEED'] = str(seed)
     random.seed(seed)
     np.random.seed(seed)
