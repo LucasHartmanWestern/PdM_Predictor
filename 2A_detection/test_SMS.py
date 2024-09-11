@@ -34,16 +34,16 @@ def get_fouling_percentage(tgt_image):
 
 
 def plot_metric(metric, metric_name):
-    global model_version, save_path
+    global save_path
     plt.clf()
     metric.plot(score=True)
-    plt.savefig(os.path.join(save_path, 'model_{}_test_{}.png'.format(model_version, metric_name)))
+    plt.savefig(os.path.join(save_path, 'test_{}.png'.format(metric_name)))
     torch.save(metric.state_dict(), os.path.join(save_path, '{}.pth'.format(metric_name)))
     metric.reset()
 
 
 def print_hist(metric_vals, metric_name):
-    global model_version, save_path
+    global save_path
     plt.clf()
     plt.figure(figsize=(8, 6))
     values, bins, bars = plt.hist(metric_vals, edgecolor='white')
@@ -51,7 +51,7 @@ def print_hist(metric_vals, metric_name):
     plt.ylabel('number of predictions')
     plt.bar_label(bars)
     plt.suptitle('Prediction Histogram for {}'.format(metric_name), fontsize=16, fontweight='bold')
-    plt.savefig(os.path.join(save_path, 'model_{}_test_{}.png'.format(model_version, metric_name)))
+    plt.savefig(os.path.join(save_path, 'test_{}.png'.format(metric_name)))
 
     # csv_path = os.path.join(save_path, '{}.csv'.format(metric_name))
     # open(csv_path, 'w+').close()  # overwrite/ make new blank file
