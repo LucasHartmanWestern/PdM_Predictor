@@ -1,1 +1,0 @@
-python train.py -mn nested_unet -rs n

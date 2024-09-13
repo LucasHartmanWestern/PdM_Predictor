@@ -1,1 +1,0 @@
-python train.py -mn cgnet -rs n
