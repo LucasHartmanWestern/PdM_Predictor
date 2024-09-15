@@ -90,7 +90,7 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
             losses_val[epoch], f1_val[epoch], jaccard_val[epoch]))
 
         # --- check for potential early stopping --- #
-        if early_stop_counter == 10:
+        if early_stop_counter == 20:
             log_and_print("{} early stopping at epoch {}".format(datetime.now(), epoch + 1))
             break
 
