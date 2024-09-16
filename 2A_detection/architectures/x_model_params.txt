@@ -2,5 +2,10 @@ Old UNet = 31,037,633 params
 New UNet (512 bottleneck) = 7,852,545 params
 New UNet (1024 bottleneck) = 31,390,721 params
 Nested UNet (512 bottleneck) = 9,163,329 params
-Nested UNet (1024 bottleneck) = ? params
+Nested UNet (1024 bottleneck) = 36,629,633 params
 CGNet = 491,698 params
+
+-- Custom --
+FastNestedUNet = 4,195,871 params
+FastUNet = 3,571,487 params
+QuickNet = 293,177 params

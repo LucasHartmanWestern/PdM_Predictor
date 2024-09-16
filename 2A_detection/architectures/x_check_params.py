@@ -8,7 +8,7 @@ from plain_unet import UNet
 from nested_unet import UNet_new, NestedUNet
 from cgnet import Context_Guided_Network
 from mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
-from custom_unet import FastNestedUNet
+from custom_arch import FastNestedUNet, FastUNet, QuickNet
 
 if __name__ == '__main__':
     # hyperparameters
@@ -22,6 +22,8 @@ if __name__ == '__main__':
     model5 = MobileNetV3_Small(1)
     model6 = MobileNetV3_Large(1)
     model7 = FastNestedUNet()
+    model8 = FastUNet()
+    model9 = QuickNet()
 
     # run torch summary report
     # summary(model1, input_size=(3, input_shape[0], input_shape[1]))
@@ -34,28 +36,39 @@ if __name__ == '__main__':
     image = np.zeros((8, 3, 512, 512), dtype=np.float32)
     image = torch.tensor(image).cpu()
 
-    start = time()
-    output = model2(image)
-    print('UNet: {}'.format(time() - start))
+    # start = time()
+    # output = model2(image)
+    # print('UNet: {}'.format(time() - start))
 
-    start = time()
-    output = model3(image)
-    print('UNet++: {}'.format(time() - start))
+    # start = time()
+    # output = model3(image)
+    # print('UNet++: {}'.format(time() - start))
 
-    start = time()
-    output = model4(image)
-    print('ContextGuidedNetwork: {}'.format(time() - start))
+    # start = time()
+    # output = model4(image)
+    # print('ContextGuidedNetwork: {}'.format(time() - start))
 
-    start = time()
-    output = model5(image)
-    print('MobileNetV3 Small: {}'.format(time() - start))
+    # start = time()
+    # output = model5(image)
+    # print('MobileNetV3 Small: {}'.format(time() - start))
 
-    start = time()
-    output = model6(image)
-    print('MobileNetV3 Large: {}'.format(time() - start))
+    # start = time()
+    # output = model6(image)
+    # print('MobileNetV3 Large: {}'.format(time() - start))
 
+    # summary(model7, input_size=(3, input_shape[0], input_shape[1]))
+    # start = time()
+    # output = model7(image)
+    # print('FastNestedUNet: {}'.format(time() - start))
+
+    # summary(model8, input_size=(3, input_shape[0], input_shape[1]))
+    # start = time()
+    # output = model8(image)
+    # print('FastUNet: {}'.format(time() - start))
+
+    summary(model9, input_size=(3, input_shape[0], input_shape[1]))
     start = time()
-    output = model7(image)
-    print('FastNestedUNet: {}'.format(time() - start))
+    output = model9(image)
+    print('QuickNet: {}'.format(time() - start))
 
 

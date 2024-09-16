@@ -16,6 +16,7 @@ from custom_ds import SMSTestDS
 from architectures.nested_unet import UNet_new, NestedUNet
 from architectures.plain_unet import UNet
 from architectures.cgnet import Context_Guided_Network
+from architectures.custom_arch import QuickNet
 
 
 def make_scenario_csvs(data):
@@ -153,6 +154,8 @@ if __name__ == '__main__':
         model = NestedUNet()
     elif args.mn == 'cgnet':
         model = Context_Guided_Network()
+    elif args.mn == 'quicknet':
+        model = QuickNet()
     else:
         model = UNet()
     weights_file = os.path.join(base_path, 'training', 'best_weights.pth')

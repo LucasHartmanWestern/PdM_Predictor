@@ -1,2 +1,1 @@
-python test_SMS.py -mn new_unet
-python test_SMS.py -mn nested_unet
+python test_SMS.py -mn quicknet
