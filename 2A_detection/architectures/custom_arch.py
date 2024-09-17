@@ -95,19 +95,23 @@ class QuickBlock(nn.Module):
 
 
 # TODO:
-#   - current design is mega lightweight so maybe go deeper?
+#   - current design is mega lightweight so maybe go deeper? like 512 or 1024?
 class QuickNet(nn.Module):
     def __init__(self, num_classes=1, input_channels=3):
         super().__init__()
 
-        nb_filter = [16, 32, 64, 128, 256]
+        nb_filter = [16, 32, 64, 128, 256, 512, 1024]
 
         self.l0_down = QuickBlock(input_channels, nb_filter[0], direction='down')  # 512 -> 256
         self.l1_down = QuickBlock(nb_filter[0], nb_filter[1], direction='down')  # 256 -> 128
         self.l2_down = QuickBlock(nb_filter[1], nb_filter[2], direction='down')  # 128 -> 64
         self.l3_down = QuickBlock(nb_filter[2], nb_filter[3], direction='down')  # 64 -> 32
         self.l4_down = QuickBlock(nb_filter[3], nb_filter[4], direction='down')  # 32 -> 16
+        self.l5_down = QuickBlock(nb_filter[4], nb_filter[5], direction='down')  # 16 -> 8
+        self.l6_down = QuickBlock(nb_filter[5], nb_filter[6], direction='down')  # 8 -> 4
 
+        self.l5_up = QuickBlock(nb_filter[6] + nb_filter[5], nb_filter[5], direction='up')
+        self.l4_up = QuickBlock(nb_filter[5] + nb_filter[4], nb_filter[4], direction='up')
         self.l3_up = QuickBlock(nb_filter[4] + nb_filter[3], nb_filter[3], direction='up')
         self.l2_up = QuickBlock(nb_filter[3] + nb_filter[2], nb_filter[2], direction='up')
         self.l1_up = QuickBlock(nb_filter[2] + nb_filter[1], nb_filter[1], direction='up')
@@ -124,7 +128,11 @@ class QuickNet(nn.Module):
         x_l2 = self.l2_down(x_l1)  # C:64, S:64
         x_l3 = self.l3_down(x_l2)  # C:128, S:32
         x_l4 = self.l4_down(x_l3)  # C:256, S:16
+        x_l5 = self.l5_down(x_l4)  # C:512, S:8
+        x_l6 = self.l6_down(x_l5)  # C:1024, S:4
         # up
+        x_l5 = self.l5_up(torch.cat([x_l5, self.up(x_l6)], 1))  # C:512, S:8
+        x_l4 = self.l4_up(torch.cat([x_l4, self.up(x_l5)], 1))  # C:256, S:16
         x_l3 = self.l3_up(torch.cat([x_l3, self.up(x_l4)], 1))  # C:128, S:32
         x_l2 = self.l2_up(torch.cat([x_l2, self.up(x_l3)], 1))  # C:64, S:64
         x_l1 = self.l1_up(torch.cat([x_l1, self.up(x_l2)], 1))  # C:32, S:128

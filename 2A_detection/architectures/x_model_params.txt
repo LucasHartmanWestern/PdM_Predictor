@@ -8,4 +8,4 @@ CGNet = 491,698 params
 -- Custom --
 FastNestedUNet = 4,195,871 params
 FastUNet = 3,571,487 params
-QuickNet = 293,177 params
+QuickNet = 4,584,121 params
