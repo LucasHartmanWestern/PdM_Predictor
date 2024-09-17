@@ -110,7 +110,8 @@ if __name__ == '__main__':
     # parse args
     parser = argparse.ArgumentParser()
     parser.add_argument('-mn', type=str, help='model name', required=True)
-    parser.add_argument('-bs', type=int, help='batch size', required=True)
+    parser.add_argument('-e', type=int, help='number of epochs', required=True)
+    parser.add_argument('-b', type=int, help='batch size', required=True)
     parser.add_argument('-rs', type=str, help='random seed (y/n)', required=True)
     args = parser.parse_args()
     assert args.mn in [
@@ -119,8 +120,9 @@ if __name__ == '__main__':
     assert args.rs in ['y', 'n'], 'ERROR: incorrect rs input'
 
     # hyperparameters
-    n_epochs = 100  # num of epochs
-    batch_sz = args.bs  # batch size
+    model_name = args.mn
+    n_epochs = args.e  # num of epochs
+    batch_sz = args.b  # batch size
     val_split = 0.2  # split for validation dataset
     input_shape = (512, 512)  # same size used in U-Net paper for training
     dataset_name = 'sm_CGS_ds'
@@ -129,7 +131,7 @@ if __name__ == '__main__':
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
     # set up paths and directories
-    save_path = os.path.join('.', 'experiments', args.mn, 'training')
+    save_path = os.path.join('.', 'experiments', model_name, 'training')
     os.makedirs(save_path, exist_ok=True)
 
     # set up logger and deterministic seed
@@ -139,7 +141,7 @@ if __name__ == '__main__':
 
     # print training hyperparameters
     print_hyperparams(
-        model_name=args.mn, num_epochs=n_epochs, batch_size=batch_sz,
+        model_name=model_name, num_epochs=n_epochs, batch_size=batch_sz,
         seed=seed, validation_split=val_split, input_shape=input_shape, dataset_name=dataset_name,
         loss_fn_name=loss_fn_name, optimizer_name=optimizer_name, device=device
     )
@@ -152,13 +154,13 @@ if __name__ == '__main__':
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
-    if args.mn == 'new_unet':
+    if model_name == 'new_unet':
         model = UNet_new()
-    elif args.mn == 'nested_unet':
+    elif model_name == 'nested_unet':
         model = NestedUNet()
-    elif args.mn == 'cgnet':
+    elif model_name == 'cgnet':
         model = Context_Guided_Network()
-    elif args.mn == 'quicknet':
+    elif model_name == 'quicknet':
         model = QuickNet()
     else:
         model = UNet()

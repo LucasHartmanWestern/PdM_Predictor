@@ -1,1 +1,1 @@
-python train.py -mn quicknet -bs 64 -rs n
+python train.py -mn quicknet -e 500 -b 64 -rs n
