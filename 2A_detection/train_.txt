@@ -1,0 +1,1 @@
+python train.py -mn effunet -e 100 -b 8 -rs n

@@ -7,7 +7,7 @@ from torchsummary import summary
 from plain_unet import UNet
 from nested_unet import UNet_new, NestedUNet
 from cgnet import Context_Guided_Network
-from mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
+from inspiration.mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
 from custom_arch import FastNestedUNet, FastUNet
 from quicknet import QuickNet
 from nicknet import NickNet
