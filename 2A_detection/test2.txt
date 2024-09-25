@@ -1,0 +1,1 @@
+python test_SMS.py -mn effunet

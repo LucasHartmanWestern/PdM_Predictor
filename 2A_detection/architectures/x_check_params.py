@@ -8,7 +8,10 @@ from plain_unet import UNet
 from nested_unet import UNet_new, NestedUNet
 from cgnet import Context_Guided_Network
 from mobilenetv3 import MobileNetV3_Small, MobileNetV3_Large
-from custom_arch import FastNestedUNet, FastUNet, QuickNet
+from custom_arch import FastNestedUNet, FastUNet
+from quicknet import QuickNet
+from nicknet import NickNet
+from eff_unet import EffUNet
 
 if __name__ == '__main__':
     # hyperparameters
@@ -24,12 +27,8 @@ if __name__ == '__main__':
     model7 = FastNestedUNet()
     model8 = FastUNet()
     model9 = QuickNet()
-
-    # run torch summary report
-    # summary(model1, input_size=(3, input_shape[0], input_shape[1]))
-    # summary(model2, input_size=(3, input_shape[0], input_shape[1]))
-    # summary(model3, input_size=(3, input_shape[0], input_shape[1]))
-    # summary(model4, input_size=(3, input_shape[0], input_shape[1]))
+    model10 = NickNet()
+    model11 = EffUNet()
 
     # ------- TESTING MODEL INFERENCE TIMES -------- #
 
@@ -66,9 +65,19 @@ if __name__ == '__main__':
     # output = model8(image)
     # print('FastUNet: {}'.format(time() - start))
 
-    summary(model9, input_size=(3, input_shape[0], input_shape[1]))
+    # summary(model9, input_size=(3, input_shape[0], input_shape[1]))
+    # start = time()
+    # output = model9(image)
+    # print('QuickNet: {}'.format(time() - start))
+
+    # summary(model10, input_size=(3, input_shape[0], input_shape[1]))
+    # start = time()
+    # output = model10(image)
+    # print('NickNet: {}'.format(time() - start))
+
+    summary(model11, input_size=(3, input_shape[0], input_shape[1]))
     start = time()
-    output = model9(image)
-    print('QuickNet: {}'.format(time() - start))
+    output = model11(image)
+    print('EffUNet: {}'.format(time() - start))
 
 

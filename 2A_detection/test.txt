@@ -1,1 +1,1 @@
-python test_SMS.py -mn quicknet
+python test_SMS.py -mn nicknet

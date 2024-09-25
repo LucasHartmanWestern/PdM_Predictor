@@ -13,7 +13,9 @@ from utils.data_import_util import get_xy_data
 from architectures.nested_unet import UNet_new, NestedUNet
 from architectures.plain_unet import UNet
 from architectures.cgnet import Context_Guided_Network
-from architectures.custom_arch import QuickNet
+from architectures.quicknet import QuickNet
+from architectures.nicknet import NickNet
+from architectures.eff_unet import EffUNet
 from utils.log_util import log_and_print, setup_basic_logger, print_hyperparams
 from utils.misc_util import print_metric_plots
 from utils.seed_util import get_random_seed, make_deterministic
@@ -31,7 +33,8 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
     jaccard_train, jaccard_val = [], []
 
     # --- iterate through all epochs --- #
-    log_and_print("{} starting training...".format(datetime.now()))
+    start_time = datetime.now()
+    log_and_print("{} starting training...".format(start_time))
     for epoch in range(n_epochs):
 
         # --- training step --- #
@@ -94,7 +97,9 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
             break
 
     # --- print and plot metrics --- #
-    log_and_print("{} training complete.".format(datetime.now()))
+    end_time = datetime.now()
+    log_and_print("{} training complete.".format(end_time))
+    log_and_print("training time elapsed: {}".format(end_time - start_time))
     log_and_print("best avg val score: {:.9f}, occurred on epoch {}".format(best_avg_score, best_epoch))
     log_and_print("{} generating plots...".format(datetime.now()))
     metrics_history = [
@@ -115,7 +120,7 @@ if __name__ == '__main__':
     parser.add_argument('-rs', type=str, help='random seed (y/n)', required=True)
     args = parser.parse_args()
     assert args.mn in [
-        'new_unet', 'nested_unet', 'cgnet', 'quicknet', 'plain_unet'
+        'new_unet', 'nested_unet', 'cgnet', 'quicknet', 'plain_unet', 'nicknet', 'effunet'
     ], 'ERROR: incorrect mn input'
     assert args.rs in ['y', 'n'], 'ERROR: incorrect rs input'
 
@@ -162,6 +167,10 @@ if __name__ == '__main__':
         model = Context_Guided_Network()
     elif model_name == 'quicknet':
         model = QuickNet()
+    elif model_name == 'nicknet':
+        model = NickNet()
+    elif model_name == 'effunet':
+        model = EffUNet()
     else:
         model = UNet()
     model.to(device=device)
