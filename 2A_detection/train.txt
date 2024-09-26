@@ -1,3 +1,2 @@
-python train.py -mn nicknet -e 100 -b 32 -rs n
-python train.py -mn effunet -e 100 -b 32 -rs n
-python train.py -mn quicknet -e 100 -b 32 -rs n
+python train.py -mn nicknet -e 500 -b 32 -rs n
+python train.py -mn effunet -e 500 -b 32 -rs n

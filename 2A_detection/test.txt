@@ -1,3 +1,2 @@
 python test_SMS.py -mn nicknet
 python test_SMS.py -mn effunet
-python test_SMS.py -mn quicknet
