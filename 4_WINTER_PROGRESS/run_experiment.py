@@ -140,7 +140,7 @@ if __name__ == '__main__':
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
-    model = UNet(num_classes=7, input_channels=3)
+    model = UNet(num_classes=6, input_channels=3)
     model.to(device=device)
 
     # init model optimization parameters
