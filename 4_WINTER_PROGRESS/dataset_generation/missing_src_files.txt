@@ -1,0 +1,41 @@
+(base) nick@Nick-Strzelczyks-Mac-Pro PdM_Predictor % /usr/bin/python3 "/Users/nick_1/PycharmProjects/UWO Masters/PdM_Predictor/4_WINTER_PROGRESS/get_src_images.py"
+Copying images: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 77/77 [00:05<00:00, 15.38it/s]
+
+Files were missing for these dates:
+
+2024_06_20:     2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_06_21:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_06_22:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_06_23:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_06_24:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_06_25:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm
+2024_06_26:     4pm
+2024_06_28:     12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_06_29:     10am
+2024_07_03:     8am
+2024_07_05:     8am
+2024_07_07:     11am, 12pm, 2pm, 3pm, 5pm, 6pm, 7pm, 8pm
+2024_07_09:     8am, 7pm, 8pm
+2024_07_10:     9am, 10am, 11am, 12pm, 2pm
+2024_07_11:     6pm
+2024_07_13:     12pm
+2024_07_15:     8pm
+2024_07_18:     10am, 2pm
+2024_07_20:     9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 5pm, 6pm, 7pm, 8pm
+2024_07_21:     8am, 9am, 10am, 11am, 12pm, 3pm, 5pm
+2024_07_25:     12pm, 1pm, 3pm
+2024_07_26:     3pm
+2024_08_12:     5pm
+2024_08_15:     8pm
+2024_08_16:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_08_17:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_08_18:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_08_19:     8am, 9am, 10am, 11am, 12pm, 1pm, 2pm, 3pm, 4pm, 5pm, 6pm, 7pm, 8pm
+2024_08_20:     8am, 9am
+2024_08_24:     8am
+2024_08_25:     3pm
+2024_08_26:     8am, 9am, 10am, 3pm, 7pm, 8pm
+2024_08_27:     8am, 5pm
+2024_08_28:     10am, 1pm, 5pm
+
+Found 44 full days successfully
