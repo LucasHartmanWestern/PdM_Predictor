@@ -108,7 +108,8 @@ if __name__ == '__main__':
     n_epochs = 100  # num of epochs
     batch_sz = 12  # batch size
     input_shape = (360, 360)
-    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    device = torch.device('cpu')
 
     # set up paths and directories
     save_path = os.path.join("./preliminary_experiments_WINTER_2025")
