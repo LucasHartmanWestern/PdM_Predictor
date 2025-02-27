@@ -37,6 +37,8 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
             targets = targets.to(device=device)
             outputs = model(samples)
             loss = loss_fn(outputs, targets)
+            print(f"loss: {loss}")
+            print(f"loss shape: {loss.shape}")
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -104,7 +106,7 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
 if __name__ == '__main__':
     # hyperparameters
     n_epochs = 100  # num of epochs
-    batch_sz = 4  # batch size
+    batch_sz = 12  # batch size
     input_shape = (360, 360)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -134,7 +136,7 @@ if __name__ == '__main__':
     # set up dataset(s)
     train_ds = ROI_DS(["feb24_ds1"])
     val_ds = ROI_DS_Val("feb24_ds2")
-    train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=False)
+    train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
