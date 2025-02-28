@@ -11,7 +11,6 @@ from tqdm import tqdm
 
 from custom_ds import ROI_DS, ROI_DS_Val, FullSize_DS, FullSize_DS_Val
 from architectures.unet import UNet
-from architectures.nicknet import NickNet
 from architectures.cgnet import Context_Guided_Network as CGNet
 from utils import *
 
@@ -152,8 +151,7 @@ if __name__ == '__main__':
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
-    model = NickNet(num_classes=num_classes, input_channels=3)
-    # model = CGNet(num_classes=num_classes, M=3, N=21)
+    model = CGNet(num_classes=num_classes, M=3, N=21)
     # model = UNet(num_classes=num_classes, input_channels=3)
     model.to(device=device)
 
