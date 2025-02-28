@@ -57,7 +57,8 @@ class FullSize_DS(Dataset):
 
 # Only used for getting preliminary results
 class FullSize_DS_Val(Dataset):
-    def __init__(self, ds_folder, binary_targets=False):
+    def __init__(self, ds_folder, binary_targets=False, resize_shape=None):
+        self.resize_shape = resize_shape  # must be smaller than 1920x1080
         self.binary_targets = binary_targets
         self.x, self.y, self.day = [], [], []
         list_name = 'binary_list.txt' if binary_targets else 'list.txt'
@@ -76,6 +77,11 @@ class FullSize_DS_Val(Dataset):
     def __getitem__(self, idx):
         sample = cv2.imread(self.x[idx], cv2.IMREAD_COLOR)
         target = cv2.imread(self.y[idx], cv2.IMREAD_GRAYSCALE)
+
+        if self.resize_shape is not None and self.resize_shape != target.shape[:2]:
+            sample = cv2.resize(sample, self.resize_shape, interpolation=cv2.INTER_AREA)
+            target = cv2.resize(target, self.resize_shape, interpolation=cv2.INTER_AREA)
+
         sample = np.transpose(sample, axes=(2, 0, 1))  
         sample = sample.astype(np.float32)
         sample *= (1 / 255.0)
