@@ -106,7 +106,7 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
 if __name__ == '__main__':
     # hyperparameters
     n_epochs = 5  # num of epochs
-    batch_sz = 2  # batch size
+    batch_sz = 1  # batch size
     patience = 5
     num_classes = 7
     # input_shape = (360, 360)
