@@ -8,44 +8,10 @@ from tqdm import tqdm
 from utils import *
 
 
-def training_step(model, loss_fn, optimizer, train_loader, device, epoch):
-    model.train()
-    epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
-    for _, samples, targets in tqdm(train_loader, desc="epoch {} train progress".format(epoch)):
-        samples = samples.to(device=device)
-        targets = targets.to(device=device)
-        outputs = model(samples)
-        loss = loss_fn(outputs, targets)
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
-        epoch_loss += loss.item()
-        epoch_f1 += f1_score(outputs, targets, num_classes=7).item()
-        epoch_jac += jaccard_index(outputs, targets, num_classes=7).item()
-        del samples, targets, outputs
-    return epoch_loss / len(train_loader), epoch_f1 / len(train_loader), epoch_jac / len(train_loader)
-
-
-def validation_step(model, loss_fn, val_loader, device, epoch):
-    model.eval()
-    epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
-    with torch.no_grad():
-        for _, samples, targets in tqdm(val_loader, desc="epoch {} val progress".format(epoch)):
-            samples = samples.to(device=device)
-            targets = targets.to(device=device)
-            outputs = model(samples)
-            epoch_loss += loss_fn(outputs, targets).item()
-            epoch_f1 += f1_score(outputs, targets, num_classes=7).item()
-            epoch_jac += jaccard_index(outputs, targets, num_classes=7).item()
-            del samples, targets, outputs
-    return epoch_loss / len(val_loader), epoch_f1 / len(val_loader), epoch_jac / len(val_loader)
-
-
 def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, patience=None):
     epochs_without_improvement = 0
     best_epoch = 0
     best_f1_score = 0.0
-
     losses_train, losses_val = [], []
     f1_train, f1_val = [], []
     jaccard_train, jaccard_val = [], []
@@ -55,16 +21,41 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
     for epoch in range(n_epochs):
 
         # --- training step --- #
-        epoch_loss, epoch_f1, epoch_jac = training_step(model, loss_fn, optimizer, train_loader, device, epoch + 1)
-        losses_train.append(epoch_loss)
-        f1_train.append(epoch_f1)
-        jaccard_train.append(epoch_jac)
+        model.train()
+        epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
+        for _, samples, targets in tqdm(train_loader, desc="epoch {} train progress".format(epoch + 1)):
+            samples = samples.to(device=device)
+            targets = targets.to(device=device)
+            outputs = model(samples)
+            loss = loss_fn(outputs, targets)
+            optimizer.zero_grad()
+            loss.backward()
+            optimizer.step()
+            epoch_loss += loss.item()
+            epoch_f1 += f1_score(outputs, targets, num_classes=7).item()
+            epoch_jac += jaccard_index(outputs, targets, num_classes=7).item()
+            del samples, targets, outputs
+        
+        losses_train.append(epoch_loss / len(train_loader))
+        f1_train.append(epoch_f1 / len(train_loader))
+        jaccard_train.append(epoch_jac / len(train_loader))
 
         # --- validation step --- #
-        epoch_loss, epoch_f1, epoch_jac = validation_step(model, loss_fn, val_loader, device, epoch + 1)
-        losses_val.append(epoch_loss)
-        f1_val.append(epoch_f1)
-        jaccard_val.append(epoch_jac)
+        model.eval()
+        epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
+        with torch.no_grad():
+            for _, samples, targets in tqdm(val_loader, desc="epoch {} val progress".format(epoch + 1)):
+                samples = samples.to(device=device)
+                targets = targets.to(device=device)
+                outputs = model(samples)
+                epoch_loss += loss_fn(outputs, targets).item()
+                epoch_f1 += f1_score(outputs, targets, num_classes=7).item()
+                epoch_jac += jaccard_index(outputs, targets, num_classes=7).item()
+                del samples, targets, outputs
+        
+        losses_val.append(epoch_loss / len(val_loader))
+        f1_val.append(epoch_f1 / len(val_loader))
+        jaccard_val.append(epoch_jac / len(val_loader))
 
         # --- print epoch results --- #
         log_and_print("{} epoch {}/{} metrics:".format(datetime.now(), epoch + 1, n_epochs))
@@ -101,5 +92,5 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
         ("jaccard_index", jaccard_train, jaccard_val),
     ]
     save_metrics_CSV(metrics_history, save_path)
-    log_and_print("{} script finished.".format(datetime.now()))
+    log_and_print("{} training script finished.".format(datetime.now()))
 

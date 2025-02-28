@@ -68,7 +68,7 @@ class OutConv(nn.Module):
 
 
 class UNet(nn.Module):
-    def __init__(self, num_classes=2, input_channels=3, activation=None):
+    def __init__(self, num_classes=7, input_channels=3, activation=None):
         super(UNet, self).__init__()
         self.inc = (DoubleConv(input_channels, 64))
         self.down1 = (Down(64, 128))
