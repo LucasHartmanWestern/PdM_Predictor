@@ -23,9 +23,9 @@ def log_and_print(msg):
     logging.info(msg)
     print(msg)
 
-def print_hyperparams(**kwargs):
+def print_hyperparams(hyperparams):
     log_and_print('HYPERPARAMETERS:')
-    for key, value in kwargs.items():
+    for key, value in hyperparams.items():
         log_and_print('\t{}: {}'.format(key, str(value)))
     log_and_print('\n')
 
@@ -38,10 +38,8 @@ def get_random_seed():
 
     source: https://stackoverflow.com/questions/57416925/best-practices-for-generating-a-random-seeds-to-seed-pytorch/57416967#57416967
     """
-    RAND_SIZE = 4
-    random_data = os.urandom(RAND_SIZE)  # Return a string of size random bytes suitable for cryptographic use.
-    random_seed = int.from_bytes(random_data, byteorder="big")
-    return random_seed
+    # Return a string of size random bytes suitable for cryptographic use.
+    return int.from_bytes(os.urandom(4), byteorder="big")
 
 
 def make_deterministic(seed):

@@ -104,7 +104,7 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
 if __name__ == '__main__':
     # hyperparameters
     n_epochs = 100  # num of epochs
-    batch_sz = 14  # batch size
+    batch_sz = 12  # batch size
     num_classes = 7
     input_shape = (360, 360)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
