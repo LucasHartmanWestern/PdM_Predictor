@@ -10,11 +10,13 @@ from torchsummary import summary
 from tqdm import tqdm
 
 from custom_ds import ROI_DS, ROI_DS_Val, FullSize_DS, FullSize_DS_Val
-from unet import UNet
+from architectures.unet import UNet
+from architectures.nicknet import NickNet
+from architectures.cgnet import Context_Guided_Network as CGNet
 from utils import *
 
 
-def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device):
+def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, patience):
     global save_path
 
     early_stop_counter = 0
@@ -84,7 +86,7 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
             losses_val[epoch], f1_val[epoch], jaccard_val[epoch]))
 
         # --- check for potential early stopping --- #
-        if early_stop_counter == 20:
+        if early_stop_counter == patience:
             log_and_print("{} early stopping at epoch {}".format(datetime.now(), epoch + 1))
             break
 
@@ -103,10 +105,12 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
 
 if __name__ == '__main__':
     # hyperparameters
-    n_epochs = 100  # num of epochs
-    batch_sz = 12  # batch size
+    n_epochs = 5  # num of epochs
+    batch_sz = 2  # batch size
+    patience = 5
     num_classes = 7
-    input_shape = (360, 360)
+    # input_shape = (360, 360)
+    input_shape = (1080, 1920)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # device = torch.device('cpu')
 
@@ -127,6 +131,7 @@ if __name__ == '__main__':
         "Device": device,
         "Epochs": n_epochs,
         "Batch Size": batch_sz,
+        "Patience": patience,
         "Input Shape": f"({input_shape[0]}, {input_shape[1]}, 3)",
         "Output Shape": f"({input_shape[0]}, {input_shape[1]}, {num_classes})",
         "Number of Classes": 7,
@@ -138,14 +143,16 @@ if __name__ == '__main__':
     })
 
     # set up dataset(s)
-    # train_ds = FullSize_DS(["feb24_ds1"])
-    # val_ds = FullSize_DS_Val("feb24_ds2")
-    train_ds = ROI_DS(["feb28_ds1"])
-    val_ds = ROI_DS_Val("feb28_ds2")
+    train_ds = FullSize_DS(["feb24_ds1"])
+    val_ds = FullSize_DS_Val("feb24_ds2")
+    # train_ds = ROI_DS(["feb28_ds1"])
+    # val_ds = ROI_DS_Val("feb28_ds2")
     train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
+    # model = NickNet(num_classes=num_classes, input_channels=3)
+    # model = CGNet(num_classes=num_classes, M=3, N=21)
     model = UNet(num_classes=num_classes, input_channels=3)
     model.to(device=device)
 
@@ -154,7 +161,7 @@ if __name__ == '__main__':
     optimizer = torch.optim.AdamW(params=model.parameters())
 
     # run torch summary report
-    # summary(model, input_size=(3, input_shape[0], input_shape[1]))
+    summary(model, input_size=(3, input_shape[0], input_shape[1]))
 
     # train model
-    train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
+    train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, patience)
