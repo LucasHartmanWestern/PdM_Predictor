@@ -9,9 +9,9 @@ import torch
 
 # ---------- Logging Methods ---------- #
 
-def setup_basic_logger(file_path):
+def setup_basic_logger(save_path):
     logging.basicConfig(
-        filename=file_path,
+        filename=os.path.join(save_path, 'training.log'),
         filemode='w',
         format="%(message)s",
         level=logging.INFO)
@@ -24,9 +24,10 @@ def log_and_print(msg):
     print(msg)
 
 def print_hyperparams(**kwargs):
-    log_and_print('Hyperparameters:')
+    log_and_print('HYPERPARAMETERS:')
     for key, value in kwargs.items():
         log_and_print('\t{}: {}'.format(key, str(value)))
+    log_and_print('\n')
 
 # ---------- Seed Methods ---------- #
 

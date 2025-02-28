@@ -27,9 +27,9 @@ class FullSize_DS(Dataset):
                 self.y.append(os.path.join(main_dir, "full_size", y.strip()))
                 self.day.append(int(x.split("_")[1]))
 
-        print("-- Full Size Dataset Created --") # debugging
-        print(f"\tConcatenated {len(ds_folder_list)} datasets,")
-        print(f"\tContaining a total of {len(self.x)} samples.")
+        # print("-- Full Size Dataset Created --") # debugging
+        # print(f"\tConcatenated {len(ds_folder_list)} datasets,")
+        # print(f"\tContaining a total of {len(self.x)} samples.")
 
     def __len__(self):
         return len(self.x)
@@ -44,15 +44,42 @@ class FullSize_DS(Dataset):
 
         # transpose RGB sample to be (C, H, W) instead of (H, W, C)
         sample = np.transpose(sample, axes=(2, 0, 1))  
-        # target = np.expand_dims(target, axis=0)
 
         # normalize values from [0, 255] to [0, 1]
         sample = sample.astype(np.float32)
         sample *= (1 / 255.0)
 
-        # target = target.astype(np.float32)
+        # convert target to LongTensor
         target = torch.from_numpy(target).type(torch.LongTensor)
 
+        return self.day[idx], sample, target
+    
+
+# Only used for getting preliminary results
+class FullSize_DS_Val(Dataset):
+    def __init__(self, ds_folder, binary_targets=False):
+        self.binary_targets = binary_targets
+        self.x, self.y, self.day = [], [], []
+        list_name = 'binary_list.txt' if binary_targets else 'list.txt'
+        main_dir = os.path.join("full_size", get_dataset_path(ds_folder))
+        day_interval = 8
+        for line in open(os.path.join(main_dir, "full_size", list_name), "r"):
+            x, y = fix_path(line).split(",") 
+            if int(x.split("_")[1]) % day_interval == 0:
+                self.x.append(os.path.join(main_dir, "full_size", x.strip()))
+                self.y.append(os.path.join(main_dir, "full_size", y.strip()))
+                self.day.append(int(x.split("_")[1]))
+
+    def __len__(self):
+        return len(self.x)
+
+    def __getitem__(self, idx):
+        sample = cv2.imread(self.x[idx], cv2.IMREAD_COLOR)
+        target = cv2.imread(self.y[idx], cv2.IMREAD_GRAYSCALE)
+        sample = np.transpose(sample, axes=(2, 0, 1))  
+        sample = sample.astype(np.float32)
+        sample *= (1 / 255.0)
+        target = torch.from_numpy(target).type(torch.LongTensor)
         return self.day[idx], sample, target
 
 
@@ -86,13 +113,12 @@ class ROI_DS(Dataset):
 
         # transpose RGB sample to be (C, H, W) instead of (H, W, C)
         sample = np.transpose(sample, axes=(2, 0, 1))  
-        # target = np.expand_dims(target, axis=0)
 
         # normalize values from [0, 255] to [0, 1]
         sample = sample.astype(np.float32)
         sample *= (1 / 255.0)
 
-        # target = target.astype(np.float32)
+        # convert target to LongTensor
         target = torch.from_numpy(target).type(torch.LongTensor)
 
         return self.day[idx], sample, target
@@ -103,7 +129,6 @@ class ROI_DS_Val(Dataset):
     def __init__(self, ds_folder, binary_targets=False):
         self.binary_targets = binary_targets
         self.x, self.y, self.day = [], [], []
-
         list_name = 'binary_list.txt' if binary_targets else 'list.txt'
         main_dir = os.path.join("rois", get_dataset_path(ds_folder))
         day_interval = 8
@@ -114,26 +139,17 @@ class ROI_DS_Val(Dataset):
                 self.y.append(os.path.join(main_dir, "rois", y.strip()))
                 self.day.append(int(x.split("_")[1]))
 
-        # print("-- ROI Validation Dataset Created --") # debugging
-        # print(f"\tContaining a total of {len(self.x)} samples.")
-
     def __len__(self):
         return len(self.x)
 
     def __getitem__(self, idx):
         sample = cv2.imread(self.x[idx], cv2.IMREAD_COLOR)
         target = cv2.imread(self.y[idx], cv2.IMREAD_GRAYSCALE)
-
         # transpose RGB sample to be (C, H, W) instead of (H, W, C)
         sample = np.transpose(sample, axes=(2, 0, 1))  
-        # target = np.expand_dims(target, axis=0)
-
         # normalize values from [0, 255] to [0, 1]
         sample = sample.astype(np.float32)
         sample *= (1 / 255.0)
-
-        # target = target.astype(np.float32)
         target = torch.from_numpy(target).type(torch.LongTensor)
-
         return self.day[idx], sample, target
     

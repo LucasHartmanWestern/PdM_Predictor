@@ -9,9 +9,9 @@ from torchmetrics.functional.classification import multiclass_f1_score as f1_sco
 from torchsummary import summary
 from tqdm import tqdm
 
-from custom_ds import ROI_DS, ROI_DS_Val
+from custom_ds import ROI_DS, ROI_DS_Val, FullSize_DS, FullSize_DS_Val
 from unet import UNet
-from utils import make_deterministic, log_and_print, setup_basic_logger, get_random_seed, save_metrics_CSV
+from utils import *
 
 
 def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device):
@@ -37,7 +37,6 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
             targets = targets.to(device=device)
             outputs = model(samples)
             loss = loss_fn(outputs, targets)
-            print(f"loss: {loss}")
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -105,42 +104,49 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device)
 if __name__ == '__main__':
     # hyperparameters
     n_epochs = 100  # num of epochs
-    batch_sz = 2  # batch size
+    batch_sz = 1  # batch size
+    num_classes = 7
     input_shape = (360, 360)
-    # device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
-    device = torch.device('cpu')
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('cpu')
+
+     # set up deterministic seed
+    seed = get_random_seed()
+    make_deterministic(seed)
 
     # set up paths and directories
-    save_path = os.path.join("./preliminary_experiments_WINTER_2025")
+    save_path = os.path.join("./4_WINTER_PROGRESS/preliminary_RESULTS")
     os.makedirs(save_path, exist_ok=True)
 
-    # set up logger and deterministic seed
-    setup_basic_logger(os.path.join(save_path, 'training.log'))  # initialize logger
-    seed = get_random_seed()
-    make_deterministic(seed)  # set deterministic seed
+    # set up logger
+    setup_basic_logger(save_path)
 
     # print training hyperparameters
-    log_and_print(f"HYPERPARAMETERS:")
-    log_and_print(f"\tSeed: {seed}")
-    log_and_print(f"\tEpochs: {n_epochs}")
-    log_and_print(f"\tBatch Size: {batch_sz}")
-    log_and_print(f"\tInput Shape: (360, 360, 3)")
-    log_and_print(f"\tOutput Shape: (360, 360, 7)")
-    log_and_print(f"\tNumber of Classes: 7")
-    log_and_print(f"\tOptimizer: AdamW")
-    log_and_print(f"\tLoss Function: Cross Entropy")
-    log_and_print(f"\tTraining Dataset Name: 'feb24_ds1'")
-    log_and_print(f"\tValidation Dataset Name: 'feb24_ds2'")
-    log_and_print(f"\n")
+    print_hyperparams({
+        "Seed": seed,
+        "Device": device,
+        "Epochs": n_epochs,
+        "Batch Size": batch_sz,
+        "Input Shape": f"({input_shape[0]}, {input_shape[1]}, 3)",
+        "Output Shape": f"({input_shape[0]}, {input_shape[1]}, {num_classes})",
+        "Number of Classes": 7,
+        "Optimizer": "AdamW",
+        "Loss Function": "Cross Entropy",
+        "Training Dataset Name": "feb28_ds1",
+        "Validation Dataset Name": "feb28_ds2",
+        "Using ROI's?": True
+    })
 
     # set up dataset(s)
-    train_ds = ROI_DS(["feb24_ds1"])
-    val_ds = ROI_DS_Val("feb24_ds2")
+    # train_ds = FullSize_DS(["feb24_ds1"])
+    # val_ds = FullSize_DS_Val("feb24_ds2")
+    train_ds = ROI_DS(["feb28_ds1"])
+    val_ds = ROI_DS_Val("feb28_ds2")
     train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
-    model = UNet(num_classes=6, input_channels=3)
+    model = UNet(num_classes=num_classes, input_channels=3)
     model.to(device=device)
 
     # init model optimization parameters

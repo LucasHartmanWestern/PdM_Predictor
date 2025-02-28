@@ -67,9 +67,18 @@ def visualize_target(target_img):
     target_copy = target_copy.astype(np.uint8)
     imshow_and_wait(target_copy)
 
+
+def visualize_tile_matrix(target_img):
+    target_copy = target_img.copy()
+    target_copy = target_copy.astype(np.float32)
+    target_copy *= (255/(np.unique(target_copy).shape[0]-1))
+    target_copy = target_copy.astype(np.uint8)
+    target_copy = cv2.resize(target_copy, (1920, 1080), interpolation=cv2.INTER_AREA)
+    imshow_and_wait(target_copy)
+
 # ---------- Algorithm Methods ---------- #
 
-def gen_tile_matrices(ds_path, num_time_steps, num_seed_points, num_intensities, max_new_tiles=10):
+def gen_tile_matrices(ds_path, num_time_steps, num_seed_points, num_intensities, max_new_tiles):
     tile_matrix_bool = np.zeros(MATRIX_DIMS, dtype=bool)
     seed_points = [(random.randint(0, MATRIX_DIMS[0]-1), random.randint(0, MATRIX_DIMS[1]-1)) for p in range(num_seed_points)]
     num_new_tiles = num_seed_points
@@ -128,7 +137,7 @@ def gen_tile_matrices(ds_path, num_time_steps, num_seed_points, num_intensities,
                             break
 
         # save tile matrix with border effect
-        cv2.imwrite(os.path.join(ds_path, 'components', 'tile_matrices', 'tile_matrix_{}.png'.format(time_step+1)), tile_matrix_img)
+        cv2.imwrite(os.path.join(ds_path, 'components', 'tile_matrices', 'tile_matrix_{}.png'.format(time_step+1)), tile_matrix_img.astype(np.uint8))
 
 
 def gen_fouling_imgs(ds_path, tile_im_path, num_intensities, show=False):
@@ -344,7 +353,7 @@ def gen_new_dataset(
         f.write(f"include metal class in targets: {include_metal_class}\n")
 
     # generate building blocks
-    gen_tile_matrices(ds_path, num_time_steps, num_tile_seed_points, max_new_tiles_per_time_step)
+    gen_tile_matrices(ds_path, num_time_steps, num_tile_seed_points, fouling_intensity_levels, max_new_tiles_per_time_step)
     gen_fouling_imgs(ds_path, tile_im_path, fouling_intensity_levels)
 
     # generate full-size targets and samples
@@ -368,11 +377,19 @@ if __name__ == '__main__':
     # hyperparameters
     num_days = 43
     src_folder_path = '/Users/nick_1/PycharmProjects/UWO Masters/data/src_images'
-    dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data/feb24_ds5'
+    dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data/feb28_ds1'
+    
 
     # ----- ----- ----- #
 
     gen_new_dataset(dataset_path, src_folder_path, num_days)
+
+    # ----- ----- ----- #
+
+    # dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data'
+    # for i in range(5):
+    #     ds_num_path = os.path.join(dataset_path, f'feb28_ds{i+1}')
+    #     gen_new_dataset(ds_num_path, src_folder_path, num_days)
 
     # ----- ----- ----- #
 
