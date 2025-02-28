@@ -143,8 +143,8 @@ if __name__ == '__main__':
     })
 
     # set up dataset(s)
-    train_ds = FullSize_DS(["feb24_ds1"])
-    val_ds = FullSize_DS_Val("feb24_ds2")
+    train_ds = FullSize_DS(["feb28_ds1"])
+    val_ds = FullSize_DS_Val("feb28_ds2")
     # train_ds = ROI_DS(["feb28_ds1"])
     # val_ds = ROI_DS_Val("feb28_ds2")
     train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
