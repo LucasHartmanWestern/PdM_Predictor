@@ -110,7 +110,8 @@ if __name__ == '__main__':
     patience = 5
     num_classes = 7
     # input_shape = (360, 360)
-    input_shape = (1080, 1920)
+    # input_shape = (1080, 1920)
+    input_shape = (540, 960)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
     # device = torch.device('cpu')
 
@@ -143,8 +144,8 @@ if __name__ == '__main__':
     })
 
     # set up dataset(s)
-    train_ds = FullSize_DS(["feb28_ds1"])
-    val_ds = FullSize_DS_Val("feb28_ds2")
+    train_ds = FullSize_DS(["feb28_ds1"], resize_shape=(input_shape[1], input_shape[0]))
+    val_ds = FullSize_DS_Val("feb28_ds2", resize_shape=(input_shape[1], input_shape[0]))
     # train_ds = ROI_DS(["feb28_ds1"])
     # val_ds = ROI_DS_Val("feb28_ds2")
     train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
