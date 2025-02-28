@@ -152,9 +152,9 @@ if __name__ == '__main__':
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
-    # model = NickNet(num_classes=num_classes, input_channels=3)
+    model = NickNet(num_classes=num_classes, input_channels=3)
     # model = CGNet(num_classes=num_classes, M=3, N=21)
-    model = UNet(num_classes=num_classes, input_channels=3)
+    # model = UNet(num_classes=num_classes, input_channels=3)
     model.to(device=device)
 
     # init model optimization parameters
