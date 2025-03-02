@@ -69,11 +69,3 @@ def get_dataset_path(ds_folder_name):
 def fix_path(path):
     return path.replace('/', '\\') if sys.platform == 'win32' else path
 
-# ---------- Metrics Save Methods ---------- #
-
-def save_metrics_CSV(metrics_dict, save_path):
-    open(os.path.join(save_path, 'metrics.csv'), 'w+').close()
-    with open(os.path.join(save_path, 'metrics.csv'), 'w') as f:
-        writer = csv.writer(f)
-        writer.writerow(metrics_dict.keys())
-        writer.writerows(zip(*metrics_dict.values()))

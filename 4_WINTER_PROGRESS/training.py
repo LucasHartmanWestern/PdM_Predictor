@@ -6,6 +6,33 @@ from torchmetrics.functional.classification import multiclass_f1_score as f1_sco
 from tqdm import tqdm
 
 from utils import *
+from visualization import create_metric_plots
+
+
+def save_metrics_CSV(metrics_dict, save_path):
+    # Create headers
+    headers = ['Epoch']
+    for metric_name in metrics_dict.keys():
+        if metric_name != 'Epoch':  # Skip the epochs key
+            headers.extend([f'Train {metric_name}', f'Val {metric_name}'])
+    
+    # Create the CSV file
+    filepath = os.path.join(save_path, 'training_metrics.csv')
+    open(filepath, 'w+').close()
+    with open(filepath, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        
+        # Write data rows
+        for i in range(len(metrics_dict['Epoch'])):
+            row = [metrics_dict['Epoch'][i]]
+            for metric_name in metrics_dict.keys():
+                if metric_name != 'Epoch':  # Skip the epochs key
+                    row.extend([
+                        metrics_dict[metric_name]['train'][i],
+                        metrics_dict[metric_name]['val'][i]
+                    ])
+            writer.writerow(row)
 
 
 def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, patience=None):
@@ -86,11 +113,24 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
         torch.save(model.state_dict(), os.path.join(save_path, "final_weights.pth"))
 
     # --- save metrics --- #
-    metrics_history = [
-        ("loss", losses_train, losses_val),
-        ("f1_score", f1_train, f1_val),
-        ("jaccard_index", jaccard_train, jaccard_val),
-    ]
+    log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
+    metrics_history = {
+        "Epoch": list(range(1, n_epochs + 1)),
+        "Loss": {
+            "Train": losses_train, 
+            "Val": losses_val
+        },
+        "F1 Score": {
+            "Train": f1_train, 
+            "Val": f1_val
+        },
+        "Jaccard Index": {
+            "Train": jaccard_train, 
+            "Val": jaccard_val
+        }
+    }
     save_metrics_CSV(metrics_history, save_path)
+    create_metric_plots(metrics_history, save_path)
+    
     log_and_print("{} training script finished.".format(datetime.now()))
 

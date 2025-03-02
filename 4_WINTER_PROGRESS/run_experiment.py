@@ -14,7 +14,7 @@ from utils import *
 
 def run_ROI_experiment(model, results_folder, seed=None):
     # hyperparameters
-    n_epochs = 25  # num of epochs
+    n_epochs = 20  # num of epochs
     batch_sz = 16  # batch size
     patience = 5
     num_classes = 7
