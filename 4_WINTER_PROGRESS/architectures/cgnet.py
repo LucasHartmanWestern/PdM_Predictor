@@ -293,10 +293,10 @@ class Context_Guided_Network(nn.Module):
 	This class defines the proposed Context Guided Network (CGNet) in this work.
 	"""
 
-	def __init__(self, classes=7, M=3, N=21, dropout_flag=False):
+	def __init__(self, num_classes=7, M=3, N=21, dropout_flag=False):
 		"""
 		args:
-		  classes: number of classes in the dataset. Default is 19 for the cityscapes
+		  num_classes: number of classes in the dataset. Default is 19 for the cityscapes
 		  M: the number of blocks in stage 2
 		  N: the number of blocks in stage 3
 		"""
@@ -327,9 +327,9 @@ class Context_Guided_Network(nn.Module):
 
 		if dropout_flag:
 			print("have droput layer")
-			self.classifier = nn.Sequential(nn.Dropout2d(0.1, False), Conv(256, classes, 1, 1))
+			self.classifier = nn.Sequential(nn.Dropout2d(0.1, False), Conv(256, num_classes, 1, 1))
 		else:
-			self.classifier = nn.Sequential(Conv(256, classes, 1, 1))
+			self.classifier = nn.Sequential(Conv(256, num_classes, 1, 1))
 
 		# init weights
 		for m in self.modules():

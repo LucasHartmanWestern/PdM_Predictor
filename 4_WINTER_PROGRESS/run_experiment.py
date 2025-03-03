@@ -12,11 +12,12 @@ from training import train
 from utils import *
 
 
-def run_ROI_experiment(model, results_folder, n_epochs=20, seed=None):
+def run_ROI_experiment(model_name, results_folder, seed=None, binary_labels=False):
     # hyperparameters
-    batch_sz = 16  # batch size
+    batch_sz = 15  # 15 roi's make up 1 full image
+    n_epochs = 15
     patience = 5
-    num_classes = 7
+    num_classes = 2 if binary_labels else 7
     input_shape = (360, 360)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
@@ -40,22 +41,24 @@ def run_ROI_experiment(model, results_folder, n_epochs=20, seed=None):
         "Device": device,
         "Input Shape": f"({input_shape[0]}, {input_shape[1]}, 3)",
         "Output Shape": f"({input_shape[0]}, {input_shape[1]}, {num_classes})",
-        "Number of Classes": 7,
+        "Number of Classes": num_classes,
         "Optimizer": "AdamW",
         "Loss Function": "Cross Entropy",
         "Training Dataset Name": "feb28_ds1",
         "Validation Dataset Name": "feb28_ds2",
         "Using ROI's?": True,
+        "Binary Labels?": binary_labels,
         "Save Location": save_path
     })
 
     # set up dataset(s)
-    train_ds = ROI_DS(["feb28_ds1"])
-    val_ds = ROI_DS_Val("feb28_ds2")
+    train_ds = ROI_DS(["feb28_ds1"], binary_labels)
+    val_ds = ROI_DS_Val("feb28_ds2", binary_labels)
     train_loader = DataLoader(train_ds, batch_size=batch_sz, shuffle=True)
     val_loader = DataLoader(val_ds, batch_size=batch_sz, shuffle=False)
 
     # compile model
+    model = UNet(num_classes=num_classes) if model_name.lower() == "unet" else CGNet(num_classes=num_classes)
     model.to(device=device)
 
     # init model optimization parameters
@@ -66,14 +69,19 @@ def run_ROI_experiment(model, results_folder, n_epochs=20, seed=None):
     # summary(model, input_size=(3, input_shape[0], input_shape[1]))
 
     # train model
-    train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, patience)
+    train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, num_classes, patience)
 
 
 if __name__ == '__main__':
     # hyperparameters
-    custom_seed = 9876543210
-    epochs = 2
+    custom_seed = 1234567890
 
-    # run experiments
-    run_ROI_experiment(UNet(num_classes=7), "UNet_w_ROIs", epochs, custom_seed)
-    run_ROI_experiment(CGNet(classes=7), "CGNet_w_ROIs", epochs, custom_seed)
+    # -- run experiments -- #
+
+    # multiclass label experiments
+    run_ROI_experiment("unet", "UNet_w_ROIs_multiclass", custom_seed, False)
+    run_ROI_experiment("cgnet", "CGNet_w_ROIs_multiclass", custom_seed, False)
+
+    # binary label experiments
+    run_ROI_experiment("unet", "UNet_w_ROIs_binary", custom_seed, True)
+    run_ROI_experiment("cgnet", "CGNet_w_ROIs_binary", custom_seed, True)
