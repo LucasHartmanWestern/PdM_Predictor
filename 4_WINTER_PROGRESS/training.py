@@ -29,8 +29,8 @@ def save_metrics_CSV(metrics_dict, save_path):
             for metric_name in metrics_dict.keys():
                 if metric_name != 'Epoch':  # Skip the epochs key
                     row.extend([
-                        metrics_dict[metric_name]['train'][i],
-                        metrics_dict[metric_name]['val'][i]
+                        metrics_dict[metric_name]['Train'][i],
+                        metrics_dict[metric_name]['Val'][i]
                     ])
             writer.writerow(row)
 
