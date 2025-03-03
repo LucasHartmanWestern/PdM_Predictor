@@ -88,7 +88,7 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
     # --- save metrics --- #
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
     metrics_history = {
-        "Epoch": list(range(1, n_epochs + 1)),
+        "Epoch": list(range(1, epoch + 1)),
         "Loss": {
             "Train": losses_train, 
             "Val": losses_val
