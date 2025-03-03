@@ -22,7 +22,7 @@ def run_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fals
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
      # set up deterministic seed
-    seed = get_random_seed() if seed is not None else seed
+    seed = get_random_seed() if seed is None else seed
     make_deterministic(seed)
 
     # set up paths and directories
