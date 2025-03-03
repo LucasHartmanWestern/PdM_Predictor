@@ -24,7 +24,9 @@ def save_metrics_CSV(metrics_dict, save_path):
         writer.writerow(headers)
         
         # Write data rows
+        print("--- writing rows to CSV ---")
         for i in range(len(metrics_dict['Epoch'])):
+            print("appending row {}...".format(i))
             row = [metrics_dict['Epoch'][i]]
             for metric_name in metrics_dict.keys():
                 if metric_name != 'Epoch':  # Skip the epochs key

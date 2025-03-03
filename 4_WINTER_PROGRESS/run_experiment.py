@@ -12,9 +12,8 @@ from training import train
 from utils import *
 
 
-def run_ROI_experiment(model, results_folder, seed=None):
+def run_ROI_experiment(model, results_folder, n_epochs=20, seed=None):
     # hyperparameters
-    n_epochs = 20  # num of epochs
     batch_sz = 16  # batch size
     patience = 5
     num_classes = 7
@@ -73,7 +72,8 @@ def run_ROI_experiment(model, results_folder, seed=None):
 if __name__ == '__main__':
     # hyperparameters
     custom_seed = 9876543210
+    epochs = 2
 
     # run experiments
-    run_ROI_experiment(UNet(num_classes=7), "UNet_w_ROIs", custom_seed)
-    run_ROI_experiment(CGNet(classes=7), "CGNet_w_ROIs", custom_seed)
+    run_ROI_experiment(UNet(num_classes=7), "UNet_w_ROIs", epochs, custom_seed)
+    run_ROI_experiment(CGNet(classes=7), "CGNet_w_ROIs", epochs, custom_seed)
