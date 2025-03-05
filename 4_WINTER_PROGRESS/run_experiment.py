@@ -124,7 +124,7 @@ if __name__ == '__main__':
     parser.add_argument('-exp', type=str, help='experiment type', required=True)
     parser.add_argument('-model', type=str, help='model name', required=True)
     parser.add_argument('-folder', type=str, help='save folder', required=True)
-    parser.add_argument('-binary', type=bool, help='batch size', required=True)
+    parser.add_argument('-binary', type=str, help='binary labels (y/n)', required=True)
     args = parser.parse_args()
     
     # hyperparameters
@@ -132,7 +132,7 @@ if __name__ == '__main__':
     exp = args.exp.lower()
     model_name = args.model.lower()
     folder_name = args.folder
-    is_binary = args.binary
+    is_binary = args.binary.lower() == 'y'
     print("is_binary: " + str(is_binary))
 
     # assert input arguments
