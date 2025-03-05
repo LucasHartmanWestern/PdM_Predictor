@@ -113,5 +113,5 @@ def test(model, test_loader, device, save_path, n_classes):
     log_and_print("{} testing complete.".format(datetime.now()))
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
     save_metrics_CSV(metrics_history, save_path, n_classes)
-    create_metric_plots(metrics_history, save_path)
+    create_metric_plots(metrics_history, save_path, n_classes)
     log_and_print("{} testing script finished.".format(datetime.now()))
