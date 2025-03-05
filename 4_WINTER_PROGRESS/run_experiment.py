@@ -27,7 +27,7 @@ def run_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fals
     make_deterministic(seed)
 
     # set up paths and directories
-    save_path = os.path.join(".", "4_WINTER_PROGRESS", "preliminary_RESULTS", results_folder)
+    save_path = os.path.join(".", "preliminary_RESULTS", results_folder)
     os.makedirs(save_path, exist_ok=True)
 
     # set up logger
@@ -85,7 +85,7 @@ def test_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fal
     make_deterministic(seed)
 
     # set up paths and directories
-    save_path = os.path.join(".", "4_WINTER_PROGRESS", "preliminary_RESULTS", results_folder)
+    save_path = os.path.join(".", "preliminary_RESULTS", results_folder)
     os.makedirs(save_path, exist_ok=True)
 
     # set up logger
