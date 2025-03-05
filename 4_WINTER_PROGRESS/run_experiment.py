@@ -111,7 +111,7 @@ def test_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fal
 
     # compile model
     model = UNet(num_classes=num_classes) if model_name.lower() == "unet" else CGNet(num_classes=num_classes)
-    model.load_state_dict(torch.load(os.path.join(save_path, 'best_weights.pth')))
+    model.load_state_dict(torch.load(os.path.join(save_path, 'best_weights.pth'), weights_only=True))
     model.to(device=device)
 
     # test model
