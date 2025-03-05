@@ -86,8 +86,8 @@ def test(model, test_loader, device, save_path, n_classes):
     with torch.no_grad():
         for day_nums, samples, targets in tqdm(test_loader, desc="testing progress"):
             day_nums = day_nums.tolist()
-            print(day_nums)
-            assert all(day_nums[0] in day_nums), "ERROR: day_nums are not the same for all samples in batch"
+            # print(day_nums)
+            assert all(day_num == day_nums[0] for day_num in day_nums), "ERROR: day_nums are not the same for all samples in batch"
             metrics_history["Day"].append(day_nums[0])
 
             samples = samples.to(device=device)

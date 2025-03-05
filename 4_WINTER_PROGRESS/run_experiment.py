@@ -133,6 +133,7 @@ if __name__ == '__main__':
     model_name = args.model.lower()
     folder_name = args.folder
     is_binary = args.binary
+    print("is_binary: " + str(is_binary))
 
     # assert input arguments
     assert exp in ['train', 'test'], 'ERROR: incorrect experiment type input'
