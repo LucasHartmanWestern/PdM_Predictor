@@ -1,0 +1,4 @@
+python run_experiment.py -exp test -model unet -folder UNet_w_ROIs_multiclass -binary False
+python run_experiment.py -exp test -model cgnet -folder CGNet_w_ROIs_multiclass -binary False
+python run_experiment.py -exp test -model unet -folder UNet_w_ROIs_binary -binary True
+python run_experiment.py -exp test -model cgnet -folder CGNet_w_ROIs_binary -binary True

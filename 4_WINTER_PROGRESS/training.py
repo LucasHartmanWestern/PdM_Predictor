@@ -7,8 +7,53 @@ from tqdm import tqdm
 
 from utils import *
 
+# ---------- Training Helper Methods ---------- #
 
-def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, num_classes, patience=None):
+def save_metrics_CSV(metrics_dict, save_path):
+    # Create headers
+    headers = ['Epoch']
+    for metric_name in metrics_dict.keys():
+        if metric_name != 'Epoch':  # Skip the epochs key
+            headers.extend([f'Train {metric_name}', f'Val {metric_name}'])
+    
+    # Create the CSV file
+    filepath = os.path.join(save_path, 'training_metrics.csv')
+    open(filepath, 'w+').close()
+    with open(filepath, 'w', newline='') as f:
+        writer = csv.writer(f)
+        writer.writerow(headers)
+        
+        # Write data rows
+        for i in range(len(metrics_dict['Epoch'])):
+            row = [metrics_dict['Epoch'][i]]
+            for metric_name in metrics_dict.keys():
+                if metric_name != 'Epoch':  # Skip the epochs key
+                    row.extend([
+                        metrics_dict[metric_name]['Train'][i],
+                        metrics_dict[metric_name]['Val'][i]
+                    ])
+            writer.writerow(row)
+            
+
+def create_metric_plots(metrics_dict, save_path):
+    save_path = os.path.join(save_path, "training_plots")
+    os.makedirs(save_path, exist_ok=True)
+
+    for key, val in metrics_dict.items():
+        if key != "Epoch":
+            plt.clf()
+            plt.plot(val["Train"])
+            plt.plot(val["Val"])
+            plt.title(f"Training {key}")
+            plt.ylabel(key)
+            plt.xlabel("Epoch")
+            plt.legend(['Train', 'Val'])
+            plt.savefig(os.path.join(save_path, f"{key.lower().split(' ')[0]}_plot.png"))
+
+
+# ---------- Training Main Methods ---------- #
+
+def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, n_classes, patience=None):
     epochs_without_improvement = 0
     best_epoch = 0
     best_f1_score = 0.0
@@ -32,8 +77,8 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
-            epoch_f1 += f1_score(outputs, targets, num_classes=num_classes).item()
-            epoch_jac += jaccard_index(outputs, targets, num_classes=num_classes).item()
+            epoch_f1 += f1_score(outputs, targets, num_classes=n_classes).item()
+            epoch_jac += jaccard_index(outputs, targets, num_classes=n_classes).item()
             del samples, targets, outputs
         
         losses_train.append(epoch_loss / len(train_loader))
@@ -49,8 +94,8 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
                 targets = targets.to(device=device)
                 outputs = model(samples)
                 epoch_loss += loss_fn(outputs, targets).item()
-                epoch_f1 += f1_score(outputs, targets, num_classes=num_classes).item()
-                epoch_jac += jaccard_index(outputs, targets, num_classes=num_classes).item()
+                epoch_f1 += f1_score(outputs, targets, num_classes=n_classes).item()
+                epoch_jac += jaccard_index(outputs, targets, num_classes=n_classes).item()
                 del samples, targets, outputs
         
         losses_val.append(epoch_loss / len(val_loader))
@@ -104,6 +149,5 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
     }
     save_metrics_CSV(metrics_history, save_path)
     create_metric_plots(metrics_history, save_path)
-    
     log_and_print("{} training script finished.".format(datetime.now()))
 

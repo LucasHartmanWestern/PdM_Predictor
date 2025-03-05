@@ -10,9 +10,10 @@ import matplotlib.pyplot as plt
 
 # ---------- Logging Methods ---------- #
 
-def setup_basic_logger(save_path):
+def setup_basic_logger(save_path, log_name):
+    assert log_name in ['training', 'testing'], 'ERROR: incorrect log name input'
     logging.basicConfig(
-        filename=os.path.join(save_path, 'training.log'),
+        filename=os.path.join(save_path, f'{log_name}.log'),
         filemode='w',
         format="%(message)s",
         level=logging.INFO)
@@ -69,58 +70,3 @@ def get_dataset_path(ds_folder_name):
 
 def fix_path(path):
     return path.replace('/', '\\') if sys.platform == 'win32' else path
-
-
-# ---------- Training Metrics Methods ---------- #
-
-def save_metrics_CSV(metrics_dict, save_path):
-    # Create headers
-    headers = ['Epoch']
-    for metric_name in metrics_dict.keys():
-        if metric_name != 'Epoch':  # Skip the epochs key
-            headers.extend([f'Train {metric_name}', f'Val {metric_name}'])
-    
-    # Create the CSV file
-    filepath = os.path.join(save_path, 'training_metrics.csv')
-    open(filepath, 'w+').close()
-    with open(filepath, 'w', newline='') as f:
-        writer = csv.writer(f)
-        writer.writerow(headers)
-        
-        # Write data rows
-        for i in range(len(metrics_dict['Epoch'])):
-            row = [metrics_dict['Epoch'][i]]
-            for metric_name in metrics_dict.keys():
-                if metric_name != 'Epoch':  # Skip the epochs key
-                    row.extend([
-                        metrics_dict[metric_name]['Train'][i],
-                        metrics_dict[metric_name]['Val'][i]
-                    ])
-            writer.writerow(row)
-
-# ---------- Plotting Methods ---------- #
-
-def create_metric_plots(metrics_dict, save_path):
-    for key, val in metrics_dict.items():
-        if key != "Epoch":
-            plt.clf()
-            plt.plot(val["Train"])
-            plt.plot(val["Val"])
-            plt.title(f"Training {key}")
-            plt.ylabel(key)
-            plt.xlabel("Epoch")
-            plt.legend(['Train', 'Val'])
-            plt.savefig(os.path.join(save_path, f"{key.lower().split(' ')[0]}_plot.png"))
-
-
-# def create_metric_plots(csv_filepath):
-#     for key, val in metrics_dict.items():
-#         if key != "Epoch":
-#             plt.clf()
-#             plt.plot(val["Train"])
-#             plt.plot(val["Val"])
-#             plt.title(f"Training {key}")
-#             plt.ylabel(key)
-#             plt.xlabel("Epoch")
-#             plt.legend(['Train', 'Val'])
-#             plt.savefig(os.path.join(save_path, f"{key.lower().split(' ')[0]}_plot.png"))

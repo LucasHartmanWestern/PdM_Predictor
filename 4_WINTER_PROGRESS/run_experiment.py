@@ -9,6 +9,7 @@ from custom_ds import ROI_DS, ROI_DS_Val, FullSize_DS, FullSize_DS_Val
 from architectures.unet import UNet
 from architectures.cgnet import Context_Guided_Network as CGNet
 from training import train
+from testing import test
 from utils import *
 
 
@@ -30,7 +31,7 @@ def run_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fals
     os.makedirs(save_path, exist_ok=True)
 
     # set up logger
-    setup_basic_logger(save_path)
+    setup_basic_logger(save_path, 'training')
 
     # print training hyperparameters
     print_hyperparams({
@@ -72,16 +73,75 @@ def run_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fals
     train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device, save_path, num_classes, patience)
 
 
+def test_ROI_experiment(model_name, results_folder, seed=None, binary_labels=False):
+    # hyperparameters
+    batch_sz = 15  # 15 roi's make up 1 full image
+    num_classes = 2 if binary_labels else 7
+    input_shape = (360, 360)
+    device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+
+     # set up deterministic seed
+    seed = get_random_seed() if seed is None else seed
+    make_deterministic(seed)
+
+    # set up paths and directories
+    save_path = os.path.join(".", "4_WINTER_PROGRESS", "preliminary_RESULTS", results_folder)
+    os.makedirs(save_path, exist_ok=True)
+
+    # set up logger
+    setup_basic_logger(save_path, 'testing')
+
+    # print training hyperparameters
+    print_hyperparams({
+        "Seed": seed,
+        "Batch Size": batch_sz,
+        "Device": device,
+        "Input Shape": f"({input_shape[0]}, {input_shape[1]}, 3)",
+        "Output Shape": f"({input_shape[0]}, {input_shape[1]}, {num_classes})",
+        "Number of Classes": num_classes,
+        "Testing Dataset Name": "feb28_ds3",
+        "Using ROI's?": True,
+        "Binary Labels?": binary_labels,
+        "Save Location": save_path
+    })
+
+    # set up dataset(s)
+    test_ds = ROI_DS(["feb28_ds3"], binary_labels)
+    test_loader = DataLoader(test_ds, batch_size=batch_sz, shuffle=False)
+
+    # compile model
+    model = UNet(num_classes=num_classes) if model_name.lower() == "unet" else CGNet(num_classes=num_classes)
+    model.load_state_dict(torch.load(os.path.join(save_path, 'best_weights.pth')))
+    model.to(device=device)
+
+    # test model
+    test(model, test_loader, device, save_path, num_classes)
+
+
 if __name__ == '__main__':
+    # parse args
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-exp', type=str, help='experiment type', required=True)
+    parser.add_argument('-model', type=str, help='model name', required=True)
+    parser.add_argument('-folder', type=str, help='save folder', required=True)
+    parser.add_argument('-binary', type=bool, help='batch size', required=True)
+    args = parser.parse_args()
+    
     # hyperparameters
     custom_seed = 1234567890
+    exp = args.exp.lower()
+    model_name = args.model.lower()
+    folder_name = args.folder
+    is_binary = args.binary
 
-    # -- run experiments -- #
+    # assert input arguments
+    assert exp in ['train', 'test'], 'ERROR: incorrect experiment type input'
+    assert model_name in ['unet', 'cgnet'], 'ERROR: incorrect model name input'
+    assert folder_name in ['UNet_w_ROIs_multiclass', 'CGNet_w_ROIs_multiclass', 'UNet_w_ROIs_binary', 'CGNet_w_ROIs_binary'], 'ERROR: incorrect save folder input'
 
-    # multiclass label experiments
-    run_ROI_experiment("unet", "UNet_w_ROIs_multiclass", custom_seed, False)
-    run_ROI_experiment("cgnet", "CGNet_w_ROIs_multiclass", custom_seed, False)
-
-    # binary label experiments
-    run_ROI_experiment("unet", "UNet_w_ROIs_binary", custom_seed, True)
-    run_ROI_experiment("cgnet", "CGNet_w_ROIs_binary", custom_seed, True)
+    # -- run experiment -- #
+    if exp == 'train':
+        run_ROI_experiment(model_name, folder_name, custom_seed, is_binary)
+    else:
+        test_ROI_experiment(model_name, folder_name, custom_seed, is_binary)
+    
