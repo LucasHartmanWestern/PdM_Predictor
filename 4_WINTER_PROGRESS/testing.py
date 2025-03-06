@@ -47,7 +47,10 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
 
                 per_day_f1_scores = []
                 for day in range(len(metrics_dict["Day"])):
-                    per_day_f1_scores.append(np.mean(val[f"Class {class_idx}"][day*13:(day+1)*13]))
+                    scores = val[f"Class {class_idx}"][day*13:(day+1)*13]
+                    if len(scores) < 13:
+                        print(f"WARNING: No scores for class {class_idx} on day {day}")
+                    per_day_f1_scores.append(np.mean(scores))
 
                 legend_list.append(f"Class {class_idx}")
                 plt.plot(per_day_f1_scores)
