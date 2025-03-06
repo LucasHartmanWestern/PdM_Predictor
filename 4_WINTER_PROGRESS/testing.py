@@ -99,8 +99,8 @@ def test(model, test_loader, device, save_path, n_classes):
             targets = targets.to(device=device)
             outputs = model(samples)
 
-            f1_scores = f1_score(outputs, targets, num_classes=n_classes, average="none").tolist()
-            jac_scores = jaccard_index(outputs, targets, num_classes=n_classes, average="none").tolist()
+            f1_scores = f1_score(outputs, targets, num_classes=n_classes, average="none", zero_division=1.0).tolist()
+            jac_scores = jaccard_index(outputs, targets, num_classes=n_classes, average="none", zero_division=1.0).tolist()
             assert len(f1_scores) == len(jac_scores) == n_classes, "ERROR: f1_scores and jac_scores must have length n_classes"
             for class_idx in range(n_classes):
                 metrics_history["F1 Score"][f"Class {class_idx}"].append(f1_scores[class_idx])
