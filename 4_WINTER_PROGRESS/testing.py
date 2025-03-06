@@ -46,7 +46,7 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
             for class_idx in range(n_classes):
 
                 per_day_f1_scores = []
-                for day in range(len(metrics_dict["Day"])):
+                for day in range(metrics_dict["Day"][-1]):
                     scores = val[f"Class {class_idx}"][day*13:(day+1)*13]
                     if len(scores) < 13:
                         print(f"WARNING: No scores for class {class_idx} on day {day}")
