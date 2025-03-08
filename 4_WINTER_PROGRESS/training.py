@@ -149,5 +149,5 @@ def train(model, loss_fn, optimizer, train_loader, val_loader, n_epochs, device,
     }
     save_metrics_CSV(metrics_history, save_path)
     create_metric_plots(metrics_history, save_path)
-    log_and_print("{} training script finished.".format(datetime.now()))
+    log_and_print("{} training script finished.\n".format(datetime.now()))
 

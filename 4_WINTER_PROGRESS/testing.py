@@ -70,7 +70,8 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
             class_f1_scores.append(metrics_dict["F1 Score"][f"Class {class_idx}"][i])
         mean_f1_scores.append(np.mean(class_f1_scores))
 
-    plt.bar(range(n_classes), mean_f1_scores)
+    bar_container = plt.bar(range(n_classes), mean_f1_scores)
+    plt.bar_label(bar_container, fmt="{:.2f}")
     plt.title("Mean Testing F1 Score by Class")
     plt.xlabel("Class")
     plt.ylabel("F1 Score")
@@ -123,7 +124,7 @@ def test(model, test_loader, device, save_path, n_classes):
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
     save_metrics_CSV(metrics_history, save_path, n_classes)
     create_metric_plots(metrics_history, save_path, n_classes)
-    log_and_print("{} testing script finished.".format(datetime.now()))
+    log_and_print("{} testing script finished.\n".format(datetime.now()))
 
 
 # DEBUGGING
