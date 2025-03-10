@@ -17,7 +17,7 @@ def run_ROI_experiment(model_name, results_folder, seed=None, binary_labels=Fals
     # hyperparameters
     batch_sz = 15  # 15 roi's make up 1 full image
     n_epochs = 15
-    patience = 5
+    patience = 10
     num_classes = 2 if binary_labels else 7
     input_shape = (360, 360)
     device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
