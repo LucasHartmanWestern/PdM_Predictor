@@ -1,4 +1,0 @@
-python run_experiment.py -exp train -model unet -folder UNet_w_ROIs_multiclass -binary n
-python run_experiment.py -exp train -model cgnet -folder CGNet_w_ROIs_multiclass -binary n
-python run_experiment.py -exp train -model unet -folder UNet_w_ROIs_binary -binary y
-python run_experiment.py -exp train -model cgnet -folder CGNet_w_ROIs_binary -binary y

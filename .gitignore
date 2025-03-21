@@ -4,7 +4,8 @@
 **/__pycache__/
 
 # large files
-1B_synthetic_rain/image_files/
-1B_synthetic_rain/output_samples/
-*/experiments/
-*plots/
+01_FALL_PROGRESS/1B_synthetic_rain/image_files/
+01_FALL_PROGRESS/1B_synthetic_rain/output_samples/
+01_FALL_PROGRESS/2A_detection/experiments/
+01_FALL_PROGRESS/3_plotting_results/plots/
+

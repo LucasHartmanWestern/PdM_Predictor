@@ -8,6 +8,9 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
+from architectures.modified_unet import Modified_UNet
+from architectures.modified_cgnet import Modified_CGNet
+
 # ---------- Logging Methods ---------- #
 
 def setup_basic_logger(save_path, log_name):
@@ -26,7 +29,7 @@ def log_and_print(msg):
     print(msg)
 
 def print_hyperparams(hyperparams):
-    log_and_print('HYPERPARAMETERS:')
+    log_and_print('\nHYPERPARAMETERS:')
     for key, value in hyperparams.items():
         log_and_print('\t{}: {}'.format(key, str(value)))
     log_and_print('\n')
@@ -59,14 +62,24 @@ def make_deterministic(seed):
 
 def get_dataset_path(ds_folder_name):
     if sys.platform == 'darwin':
-        base_path = '/Users/nick_1/PycharmProjects/UWO Masters/data'
+        base_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60'
     elif sys.platform == 'win32':
         base_path = 'C:\\Users\\NickS\\UWO_Masters\\Datasets'
     else:
         base_path = '/mnt/storage_1/bell_5g_datasets'
     full_path = os.path.join(base_path, ds_folder_name)
     assert os.path.isdir(full_path), f"ERROR: dataset folder does not exist at '{full_path}'"
-    return os.path.join(base_path, ds_folder_name)
+    return full_path
 
 def fix_path(path):
     return path.replace('/', '\\') if sys.platform == 'win32' else path
+
+
+# ---------- Model Methods ---------- #
+
+def get_model(model_name, num_classes, use_rois, resize_shape=None):
+    assert model_name.lower() in ['unet', 'cgnet'], 'ERROR: incorrect model name input'
+    if model_name.lower() == 'unet':
+        return Modified_UNet(num_classes, use_rois, resize_shape)
+    elif model_name.lower() == 'cgnet':
+        return Modified_CGNet(num_classes, use_rois, resize_shape)

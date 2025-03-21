@@ -1,26 +1,30 @@
 # PdM_Predictor
 
-# Three experiments for Journal Paper (2025)
+# ------ Three experiments for Journal Paper (2025) ------ #
 
-# 1. Segmentaiton using multi-class ROIs
-# 2. Segmentation using binary ROIs (only binary targets)
-
-# 3. Segmentation using multi-class 1920x1080 images
-# 4. Segmentation using binary 1920x1080 images (only binary targets)
-
-# 5. Segmentation using multi-class square, resized images
-# 6. Segmentation using binary square, resized images (only binary targets)
-
-# Focus on 1, 2, 3, and 5
-
-
-
-
+# 1. (ROI 360x360) Segmentaiton using multi-class targets
+# 2. (ROI 360x360) Segmentation using binary targets
+# 3. (Full-Size 1920x1080) Segmentation using multi-class targets
+# 4. (Full-Size 1920x1080) Segmentation using binary targets
 
 # Look into inference time correlation with network size
-
 # Determine which models are best for uploading onto embedded systems.
 # This can justify why we are using those specific models because it proves others have as well.
+
+
+# ------ March 11th NOTES ------ #
+# - change source data to include 60 days regardless of whether all hours were captured.
+# - change the ROI cutting to occur inside the models themselves. Make a pre-processing method and a post-processing method inside the model files.
+# - instead of bar graphs for testing metrics, use plot box graphs (candlestick thingys). (try using seaborn)
+
+Next Steps:
+# 1. [DONE] Change source data to include 60 days regardless of whether all hours were captured.
+# 2. [DONE] Change dataset generation to use new seeding method.
+# 3. Change models to incorporate pre- and post-processing algorithms for ROI's.
+# 4. Gather preliminary results with latest changes.
+# 5. Try making candlestick box plot graphs from the results (using seaborn).
+# 6. Document the algorithms and changes well for the paper as you go.
+# 7. Find predictive maintenance health prognostic method that is simple, state-of-the-art, and easy to implement.
 
 
 
