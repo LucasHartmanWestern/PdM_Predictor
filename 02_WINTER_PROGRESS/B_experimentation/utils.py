@@ -4,12 +4,30 @@ import os
 import random
 import sys
 
+import cv2
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
 
-from architectures.modified_unet import Modified_UNet
-from architectures.modified_cgnet import Modified_CGNet
+from modified_unet import Modified_UNet
+from modified_cgnet import Modified_CGNet
+
+
+# ---------- Visualization Methods ---------- #
+
+# def imshow_and_wait(img):
+#     cv2.imshow('img', img)
+#     keys = cv2.waitKey(0) & 0xFF
+#     if keys == ord('q'):
+#         cv2.destroyAllWindows()
+#         quit()
+
+# def visualize_seg_mask(img):
+#     img_copy = img.copy()
+#     img_copy = img_copy.astype(np.float32)
+#     img_copy *= (255.0/(np.unique(img_copy).shape[0]-1))
+#     img_copy = img_copy.astype(np.uint8)
+#     imshow_and_wait(img_copy)
 
 # ---------- Logging Methods ---------- #
 

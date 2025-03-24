@@ -10,17 +10,19 @@ from utils import get_dataset_path, fix_path
 
 
 class Custom_DS_60(Dataset):
-    def __init__(self, ds_folder_name, partition_name, binary_targets=False, resize_shape=None):
+    def __init__(self, ds_folder_name, partition_name, use_rois, binary_targets, resize_shape=None):
         assert partition_name in ['train', 'val', 'test'], "ERROR: Invalid partition name for custom dataset"
         day_interval = 6 if partition_name == 'val' else 1
 
         # initialize private variables
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.resize_shape = resize_shape  # must be smaller than 1920x1080
         self.binary_targets = binary_targets
+        self.use_rois = use_rois
         self.x, self.y, self.day, self.hour = [], [], [], []
 
         # get dataset path and list name
-        main_dir = os.path.join(partition_name, get_dataset_path(ds_folder_name))
+        main_dir = os.path.join(get_dataset_path(ds_folder_name), partition_name)
         list_name = 'binary_list.txt' if binary_targets else 'multiclass_list.txt'
 
         # read list file and assign private variables
@@ -42,17 +44,23 @@ class Custom_DS_60(Dataset):
         target = cv2.imread(self.y[idx], cv2.IMREAD_GRAYSCALE)
 
         # resize sample and target if specified
-        # if self.resize_shape is not None and self.resize_shape != target.shape[:2]:
+        # if self.resize_shape is not None:
         #     sample = cv2.resize(sample, self.resize_shape, interpolation=cv2.INTER_AREA)
         #     target = cv2.resize(target, self.resize_shape, interpolation=cv2.INTER_AREA)
 
         # transpose sample from (H, W, C) to (C, H, W) and normalize values from [0, 255] to [0, 1]
-        # sample = np.transpose(sample, axes=(2, 0, 1))
-        # sample = sample.astype(np.float32)
-        # sample *= (1 / 255.0)
+        sample = np.transpose(sample, axes=(2, 0, 1))
+        sample = sample.astype(np.float32)
+        sample *= (1 / 255.0)
 
-        # convert target to LongTensor
-        # target = torch.from_numpy(target).type(torch.LongTensor)
+        # crop sample and target if use_rois is True
+        # if self.use_rois:
+            # sample = sample[:, :, 60:sample.shape[1]-60]
+            # target = target[:, 60:target.shape[1]-60]
+
+        # convert sample and target to tensor and move to device
+        sample = torch.from_numpy(sample).type(torch.FloatTensor).to(device=self.device)
+        target = torch.from_numpy(target).type(torch.LongTensor).to(device=self.device)
 
         return day, hour, sample, target
     

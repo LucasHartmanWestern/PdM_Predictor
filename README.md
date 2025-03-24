@@ -20,7 +20,12 @@
 Next Steps:
 # 1. [DONE] Change source data to include 60 days regardless of whether all hours were captured.
 # 2. [DONE] Change dataset generation to use new seeding method.
-# 3. Change models to incorporate pre- and post-processing algorithms for ROI's.
+# 3. [HAVING DIFFICULTY] Change models to incorporate pre- and post-processing algorithms for ROI's.
+#       [March 21st Notes]
+#       It seems Tensors carry information from the model into the loss function.
+#       Therefore, restitching the ROI's after output messes with the Tensor information making it unable to backpropogate.
+#       Might not be able to implement this kind of pre- and post-processing inside the model.
+#
 # 4. Gather preliminary results with latest changes.
 # 5. Try making candlestick box plot graphs from the results (using seaborn).
 # 6. Document the algorithms and changes well for the paper as you go.

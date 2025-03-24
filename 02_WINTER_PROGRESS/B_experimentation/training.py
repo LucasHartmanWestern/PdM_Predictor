@@ -4,12 +4,12 @@ from datetime import datetime
 
 import torch
 from torch.utils.data import DataLoader
-from torchmetrics.functional.classification import multiclass_f1_score as f1_score, multiclass_jaccard_index as jaccard_index, dice
+from torchmetrics.functional.classification import multiclass_f1_score as f1_score, multiclass_jaccard_index as jaccard_index
 from tqdm import tqdm
 
 from utils import *
 from custom_ds_60 import Custom_DS_60
-from architectures.image_processing import preprocess_target
+from image_processing import preprocess_target, postprocess_seg_mask
 
 # ---------- Training Helper Methods ---------- #
 
@@ -61,7 +61,6 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
     losses_train, losses_val = [], []
     f1_train, f1_val = [], []
     jaccard_train, jaccard_val = [], []
-    dice_train, dice_val = [], []
 
     # hard-coded parameters
     model.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
@@ -74,10 +73,20 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
 
         # --- training step --- #
         model.train()
-        epoch_loss, epoch_f1, epoch_jac, epoch_dice = 0.0, 0.0, 0.0, 0.0
+        epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
         for _, _, sample, target in tqdm(train_loader, desc="epoch {} train progress".format(epoch + 1)):
-            target = preprocess_target(target)
+            # print("\n\n")
+            # print(f"DEBUG: model.use_rois: {model.use_rois}")
+            # print(f"DEBUG: sample shape: {sample.shape}")
+            # print(f"DEBUG: target shape before: {target.shape}")
+            target = preprocess_target(target, model.use_rois)
+            # print(f"DEBUG: target shape after: {target.shape}")
+            # postprocess_seg_mask(target, n_classes, model.use_rois)
             output = model(sample)
+            # print(f"DEBUG: output shape before: {output.shape}")
+            # postprocess_seg_mask(output, n_classes, model.use_rois)
+            # print(f"DEBUG: output shape after: {output.shape}")
+            # print("\n\n")
             loss = loss_fn(output, target)
             optimizer.zero_grad()
             loss.backward()
@@ -85,38 +94,34 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
             epoch_loss += loss.item()
             epoch_f1 += f1_score(output, target, num_classes=n_classes, zero_division=1).item()
             epoch_jac += jaccard_index(output, target, num_classes=n_classes, zero_division=1).item()
-            epoch_dice += dice(output, target, num_classes=n_classes, zero_division=1).item()
             del sample, target, output
         
         losses_train.append(epoch_loss / len(train_loader))
         f1_train.append(epoch_f1 / len(train_loader))
         jaccard_train.append(epoch_jac / len(train_loader))
-        dice_train.append(epoch_dice / len(train_loader))
 
         # --- validation step --- #
         model.eval()
-        epoch_loss, epoch_f1, epoch_jac, epoch_dice = 0.0, 0.0, 0.0, 0.0
+        epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
         with torch.no_grad():
             for _, _, sample, target in tqdm(val_loader, desc="epoch {} val progress".format(epoch + 1)):
-                target = preprocess_target(target)
+                target = preprocess_target(target, model.use_rois)
                 output = model(sample)
                 epoch_loss += loss_fn(output, target).item()
                 epoch_f1 += f1_score(output, target, num_classes=n_classes, zero_division=1).item()
                 epoch_jac += jaccard_index(output, target, num_classes=n_classes, zero_division=1).item()
-                epoch_dice += dice(output, target, num_classes=n_classes, zero_division=1).item()
                 del sample, target, output
         
         losses_val.append(epoch_loss / len(val_loader))
         f1_val.append(epoch_f1 / len(val_loader))
         jaccard_val.append(epoch_jac / len(val_loader))
-        dice_val.append(epoch_dice / len(val_loader))
 
         # --- print epoch results --- #
         log_and_print("{} epoch {}/{} metrics:".format(datetime.now(), epoch + 1, n_epochs))
-        log_and_print("\t[train] loss: {:.9f}, f1_score: {:.9f}, jaccard_idx: {:.9f}, dice_score: {:.9f}".format(
-            losses_train[epoch], f1_train[epoch], jaccard_train[epoch], dice_train[epoch]))
-        log_and_print("\t[valid] loss: {:.9f}, f1_score: {:.9f}, jaccard_idx: {:.9f}, dice_score: {:.9f}".format(
-            losses_val[epoch], f1_val[epoch], jaccard_val[epoch], dice_val[epoch]))
+        log_and_print("\t[train] loss: {:.9f}, f1_score: {:.9f}, jaccard_idx: {:.9f}".format(
+            losses_train[epoch], f1_train[epoch], jaccard_train[epoch]))
+        log_and_print("\t[valid] loss: {:.9f}, f1_score: {:.9f}, jaccard_idx: {:.9f}".format(
+            losses_val[epoch], f1_val[epoch], jaccard_val[epoch]))
         
         # --- check for early stopping --- #
         if n_patience is not None:
@@ -154,10 +159,6 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
         "Jaccard Index": {
             "Train": jaccard_train, 
             "Val": jaccard_val
-        },
-        "Dice Score": {
-            "Train": dice_train, 
-            "Val": dice_val
         }
     }
     save_metrics_CSV(metrics_history, save_path)
@@ -169,13 +170,13 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
 if __name__ == "__main__":
     # get command line arguments
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model", type=str, required=True, help="model name (str)")
-    parser.add_argument("--rois", type=str, required=True, help="use rois (y/n)")
-    parser.add_argument("--binary", type=str, required=True, help="use binary targets (y/n)")
-    parser.add_argument("--dataset", type=str, required=True, help="dataset folder name (str)")
-    parser.add_argument("--epochs", type=int, required=True, help="number of epochs (int)")
-    parser.add_argument("--patience", type=int, default=None, help="early stopping patience (int)")
-    parser.add_argument("--seed", type=int, default=None, help="custom seed (int)")
+    parser.add_argument("-model", type=str, required=True, help="model name (str)")
+    parser.add_argument("-rois", type=str, required=True, help="use rois (y/n)")
+    parser.add_argument("-binary", type=str, required=True, help="use binary targets (y/n)")
+    parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
+    parser.add_argument("-epochs", type=int, required=True, help="number of epochs (int)")
+    parser.add_argument("-patience", type=int, default=None, help="early stopping patience (int)")
+    parser.add_argument("-seed", type=int, default=None, help="custom seed (int)")
     args = parser.parse_args()
 
     # get hyperparameters
@@ -183,7 +184,7 @@ if __name__ == "__main__":
     use_rois = args.rois.lower() == "y"
     binary_targets = args.binary.lower() == "y"
     dataset_name = args.dataset.lower()
-    epochs = args.n_epochs
+    epochs = args.epochs
     patience = args.patience
     seed = args.seed if args.seed is not None else get_random_seed()
     classes = 2 if binary_targets else 7
@@ -216,9 +217,9 @@ if __name__ == "__main__":
     })
 
     # set up data loaders
-    train_ds = Custom_DS_60(dataset_name, 'train', binary_targets)
-    val_ds = Custom_DS_60(dataset_name, 'val', binary_targets)
-    train_ds_loader = DataLoader(train_ds, batch_size=1, shuffle=True)
+    train_ds = Custom_DS_60(dataset_name, 'train', use_rois, binary_targets)
+    val_ds = Custom_DS_60(dataset_name, 'val', use_rois, binary_targets)
+    train_ds_loader = DataLoader(train_ds, batch_size=1, shuffle=False)
     val_ds_loader = DataLoader(val_ds, batch_size=1, shuffle=False)
 
     # set up model and train

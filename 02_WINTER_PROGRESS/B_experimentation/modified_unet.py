@@ -2,7 +2,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from image_processing import Preprocess_Sample, Postprocess_Sample
+from image_processing import preprocess_sample
 
 # Based on code obtained from:
 # https://github.com/milesial/Pytorch-UNet/tree/master
@@ -63,8 +63,12 @@ class OutConv(nn.Module):
 # ---------- Network Module ---------- #
 
 class Modified_UNet(nn.Module):
-    def __init__(self, num_classes, use_rois=False, resize_shape=None):
+    def __init__(self, num_classes, use_rois, resize_shape=None):
         super(Modified_UNet, self).__init__()
+        self.use_rois = use_rois
+        self.resize_shape = resize_shape
+        self.num_classes = num_classes
+
         # hard-coded parameters
         input_channels=3
         activation=None
@@ -79,10 +83,6 @@ class Modified_UNet(nn.Module):
         self.up3 = (Up(128, 64))
         self.outc = (OutConv(64, num_classes))
 
-        # pre- and post-processing
-        self.pre_process = Preprocess_Sample(use_rois=use_rois, resize_shape=resize_shape)
-        self.post_process = Postprocess_Sample(use_rois=use_rois)
-
         # activation function
         if activation == 'sigmoid':
             self.activation = nn.Sigmoid()
@@ -93,7 +93,7 @@ class Modified_UNet(nn.Module):
 
     def forward(self, x):
         # pre-process input
-        x = self.pre_process(x)
+        x = preprocess_sample(x, self.use_rois, self.resize_shape)
 
         x1 = self.inc(x)
         x2 = self.down1(x1)
@@ -105,8 +105,5 @@ class Modified_UNet(nn.Module):
         x = self.outc(x)
         if self.activation is not None:
             x = self.activation(x)
-
-        # post-process output
-        x = self.post_process(x)
 
         return x
