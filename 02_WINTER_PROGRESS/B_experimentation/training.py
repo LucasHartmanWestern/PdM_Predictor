@@ -28,7 +28,7 @@ def save_metrics_CSV(metrics_dict, save_path):
         writer.writerow(headers)
         
         # Write data rows
-        for i in range(len(metrics_dict['Epoch'])):
+        for i in range(len(metrics_dict['Epoch'] + 1)):
             row = [metrics_dict['Epoch'][i]]
             for metric_name in metrics_dict.keys():
                 if metric_name != 'Epoch':  # Skip the epochs key
@@ -65,8 +65,11 @@ def create_metric_plots(metrics_dict, save_path):
             # plt.axvline(x=best_epoch_train, color='blue', linestyle='--', label='Best Epoch Train')
             # plt.axvline(x=best_epoch_val, color='orange', linestyle='--', label='Best Epoch Val')
 
-            plt.plot(best_epoch_train, best_score_train, '*', label='Best Epoch Train')
-            plt.plot(best_epoch_val, best_score_val, '*', label='Best Epoch Val')
+            # plt.plot(best_epoch_train, best_score_train, '*', label='Best Epoch Train')
+            # plt.plot(best_epoch_val, best_score_val, '*', label='Best Epoch Val')
+
+            plt.plot(best_epoch_train, best_score_train, '*')
+            plt.plot(best_epoch_val, best_score_val, '*')
 
             plt.legend()
             plt.savefig(os.path.join(save_path, f"{key.lower().split(' ')[0]}_plot.png"))
