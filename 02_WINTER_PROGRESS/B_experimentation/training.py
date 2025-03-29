@@ -74,9 +74,8 @@ def create_metric_plots(metrics_dict, save_path):
 # ---------- Training Method ---------- #
 
 def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_patience=None):
-    epochs_without_improvement = 0
-    best_loss_epoch, best_f1_epoch, best_jac_epoch, best_loss_epoch = 0, 0, 0
-    best_loss, best_f1_score, best_jac_score, best_loss = 10.0, 0.0, 0.0
+    best_loss, best_f1_score, best_jac_score = 0.0, 0.0, 0.0
+    best_loss_epoch, best_f1_epoch, best_jac_epoch, epochs_without_improvement = 0, 0, 0, 0
     losses_train, losses_val = [], []
     f1_train, f1_val = [], []
     jaccard_train, jaccard_val = [], []
@@ -137,7 +136,7 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
             losses_val[epoch], f1_val[epoch], jaccard_val[epoch]))
         
         # --- update best metrics scores and save weights --- #
-        if losses_val[epoch] < best_loss:
+        if epoch == 0 or losses_val[epoch] < best_loss:
             best_loss = losses_val[epoch]
             best_loss_epoch = epoch + 1
             torch.save(model.state_dict(), os.path.join(save_path, "best_weights.pth"))
