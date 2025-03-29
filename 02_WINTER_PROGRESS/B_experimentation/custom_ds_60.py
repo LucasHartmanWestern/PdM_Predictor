@@ -29,7 +29,7 @@ class Custom_DS_60(Dataset):
                 self.x.append(os.path.join(main_dir, x.strip()))
                 self.y.append(os.path.join(main_dir, y.strip()))
                 self.day.append(int(x.split("_")[1]))
-                self.hour.append(str(x.split("_")[2]))
+                self.hour.append(str(x.split("_")[2].split(".")[0]))
     
     def __len__(self):
         return len(self.x)
