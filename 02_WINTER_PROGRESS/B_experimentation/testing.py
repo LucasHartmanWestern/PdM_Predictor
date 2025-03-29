@@ -79,8 +79,7 @@ def test(model, test_loader, save_path, n_classes):
     model.eval()
     with torch.no_grad():
         for day_num, hour_num, sample, target in tqdm(test_loader, desc="testing progress"):
-            day_num = day_num.tolist()
-            hour_num = hour_num.tolist()
+            print(type(day_num), type(hour_num))
             print(day_num, hour_num)
             metrics_history["Day"].append(day_num)
             metrics_history["Hour"].append(hour_num)
