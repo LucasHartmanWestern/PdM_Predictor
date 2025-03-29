@@ -1,4 +1,9 @@
-python run_experiment.py -exp test -model unet -folder UNet_w_ROIs_multiclass -binary n
-python run_experiment.py -exp test -model cgnet -folder CGNet_w_ROIs_multiclass -binary n
-python run_experiment.py -exp test -model unet -folder UNet_w_ROIs_binary -binary y
-python run_experiment.py -exp test -model cgnet -folder CGNet_w_ROIs_binary -binary y
+python testing.py -model unet -rois n -binary n -dataset mar28_ds1
+python testing.py -model unet -rois y -binary n -dataset mar28_ds1
+python testing.py -model unet -rois n -binary y -dataset mar28_ds1
+python testing.py -model unet -rois y -binary y -dataset mar28_ds1
+
+python testing.py -model cgnet -rois n -binary n -dataset mar28_ds1
+python testing.py -model cgnet -rois y -binary n -dataset mar28_ds1
+python testing.py -model cgnet -rois n -binary y -dataset mar28_ds1
+python testing.py -model cgnet -rois y -binary y -dataset mar28_ds1

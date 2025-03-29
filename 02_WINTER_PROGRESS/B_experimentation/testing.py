@@ -1,19 +1,23 @@
+import argparse
 import os
 from datetime import datetime
 
 import torch
+from torch.utils.data import DataLoader
 from torchmetrics.functional.classification import multiclass_f1_score as f1_score, multiclass_jaccard_index as jaccard_index
 from tqdm import tqdm
 
 from utils import *
+from image_processing import preprocess_target, postprocess_seg_mask
+from custom_ds_60 import Custom_DS_60
 
 # ---------- Testing Helper Methods ---------- #
 
 def save_metrics_CSV(metrics_dict, save_path, n_classes):
     # Create headers
-    headers = ['Day']
+    headers = ['Day', 'Hour']
     for metric_name in metrics_dict.keys():
-        if metric_name != 'Day':  # Skip the day key
+        if metric_name != 'Day' and metric_name != 'Hour':  # Skip the day and hour key
             for class_idx in range(n_classes):
                 headers.append(f'Class {class_idx} {metric_name}')
     
@@ -26,11 +30,11 @@ def save_metrics_CSV(metrics_dict, save_path, n_classes):
         
         # Write data rows
         for i in range(len(metrics_dict['Day'])):
-            row = [metrics_dict['Day'][i]]
+            row = [metrics_dict['Day'][i], metrics_dict['Hour'][i]]
             for metric_name in metrics_dict.keys():
-                if metric_name != 'Day':  # Skip the day key
+                if metric_name != 'Day' or metric_name != 'Hour':  # Skip the day and hour key
                     for class_idx in range(n_classes):
-                        row.append(metrics_dict[metric_name][f'Class {class_idx}'][i])
+                        row.append(metrics_dict[metric_name][class_idx][i])
             writer.writerow(row)
 
 
@@ -38,36 +42,13 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
     save_path = os.path.join(save_path, "testing_plots")
     os.makedirs(save_path, exist_ok=True)
 
-    # per-day metric plots
-    for key, val in metrics_dict.items():
-        if key != "Day":
-            plt.clf()
-            legend_list = []
-            for class_idx in range(n_classes):
-
-                per_day_f1_scores = []
-                for day in range(metrics_dict["Day"][-1]):
-                    scores = val[f"Class {class_idx}"][day*13:(day+1)*13]
-                    if len(scores) < 13:
-                        print(f"WARNING: No scores for class {class_idx} on day {day}")
-                    per_day_f1_scores.append(np.mean(scores))
-
-                legend_list.append(f"Class {class_idx}")
-                plt.plot(per_day_f1_scores)
-                
-            plt.title(f"Testing {key} by Day")
-            plt.ylabel(key)
-            plt.xlabel("Day")
-            plt.legend(legend_list)
-            plt.savefig(os.path.join(save_path, f"{key.lower().split(' ')[0]}_plot.png"))
-
     # per-class f1 score bar plot
     plt.clf()
     mean_f1_scores = []
     for class_idx in range(n_classes):
         class_f1_scores = []
         for i in range(len(metrics_dict["Day"])):
-            class_f1_scores.append(metrics_dict["F1 Score"][f"Class {class_idx}"][i])
+            class_f1_scores.append(metrics_dict["F1 Score"][class_idx][i])
         mean_f1_scores.append(np.mean(class_f1_scores))
 
     bar_container = plt.bar(range(n_classes), mean_f1_scores)
@@ -80,53 +61,88 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
 
 # ---------- Testing Main Methods ---------- #
 
-def test(model, test_loader, device, save_path, n_classes):
+def test(model, test_loader, save_path, n_classes):
     metrics_history = {
+        "Hour": [],
         "Day": [],
         "F1 Score": {},
         "Jaccard Index": {}
     }
     for class_idx in range(n_classes):
-        metrics_history["F1 Score"][f"Class {class_idx}"] = []
-        metrics_history["Jaccard Index"][f"Class {class_idx}"] = []
+        metrics_history["F1 Score"][class_idx] = []
+        metrics_history["Jaccard Index"][class_idx] = []
+
+    model.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
 
     # --- iterate through all test samples --- #
-    log_and_print("{} starting testing...".format(datetime.now()))
+    log_and_print("{} starting testing...\n".format(datetime.now()))
     model.eval()
     with torch.no_grad():
-        for day_nums, _, samples, targets in tqdm(test_loader, desc="testing progress"):
-            day_nums = day_nums.tolist()
-            assert all(day_num == day_nums[0] for day_num in day_nums), "ERROR: day_nums are not the same for all samples in batch"
-            metrics_history["Day"].append(day_nums[0])
-
-            samples = samples.to(device=device)
-            targets = targets.to(device=device)
-            outputs = model(samples)
-
-            f1_scores = f1_score(outputs, targets, num_classes=n_classes, average="none", zero_division=1.0).tolist()
-            jac_scores = jaccard_index(outputs, targets, num_classes=n_classes, average="none", zero_division=1.0).tolist()
+        for day_num, hour_num, sample, target in tqdm(test_loader, desc="testing progress"):
+            metrics_history["Day"].append(day_num.item())
+            metrics_history["Hour"].append(hour_num.item())
+            target = preprocess_target(target, model.use_rois)
+            output = model(sample)
+            target = postprocess_seg_mask(target, n_classes, model.use_rois)
+            output = postprocess_seg_mask(output, n_classes, model.use_rois)
+            f1_scores = f1_score(output, target, num_classes=n_classes, average="none", zero_division=1.0).tolist()
+            jac_scores = jaccard_index(output, target, num_classes=n_classes, average="none", zero_division=1.0).tolist()
             assert len(f1_scores) == len(jac_scores) == n_classes, "ERROR: f1_scores and jac_scores must have length n_classes"
             for class_idx in range(n_classes):
-                metrics_history["F1 Score"][f"Class {class_idx}"].append(f1_scores[class_idx])
-                metrics_history["Jaccard Index"][f"Class {class_idx}"].append(jac_scores[class_idx])
+                metrics_history["F1 Score"][class_idx].append(f1_scores[class_idx])
+                metrics_history["Jaccard Index"][class_idx].append(jac_scores[class_idx])
 
-            del day_nums, samples, targets, outputs
+            del day_num, hour_num, sample, target, output
 
     # --- print results --- #
-    log_and_print("{} mean testing metrics:".format(datetime.now()))
+    log_and_print("\n{} mean testing metrics:".format(datetime.now()))
     for class_idx in range(n_classes):
-        class_key = f"Class {class_idx}"
-        log_and_print("\t[class_{}] f1_score: {:.9f}, jaccard_idx: {:.9f}".format(
-            class_idx, np.mean(metrics_history["F1 Score"][class_key]), np.mean(metrics_history["Jaccard Index"][class_key])))
+        mean_f1 = np.mean(metrics_history["F1 Score"][class_idx])
+        std_f1 = np.std(metrics_history["F1 Score"][class_idx])
+        mean_jac = np.mean(metrics_history["Jaccard Index"][class_idx])
+        std_jac = np.std(metrics_history["Jaccard Index"][class_idx])
+        log_and_print("\t[class_{}] f1_score: {:.9f} +/- {:.5f}, jaccard_idx: {:.9f} +/- {:.5f}".format(
+            class_idx, mean_f1, std_f1, mean_jac, std_jac))
 
     # --- save metrics --- #
-    log_and_print("{} testing complete.".format(datetime.now()))
+    log_and_print("\n{} testing complete.".format(datetime.now()))
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
     save_metrics_CSV(metrics_history, save_path, n_classes)
     create_metric_plots(metrics_history, save_path, n_classes)
     log_and_print("{} testing script finished.\n".format(datetime.now()))
 
 
-# DEBUGGING
-# if __name__ == "__main__":
-#     create_metric_plots(metrics_history, save_path, n_classes)
+if __name__ == "__main__":
+    # get command line arguments
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-model", type=str, required=True, help="model name (str)")
+    parser.add_argument("-rois", type=str, required=True, help="use rois (y/n)")
+    parser.add_argument("-binary", type=str, required=True, help="use binary targets (y/n)")
+    parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
+    args = parser.parse_args()
+
+    # get hyperparameters
+    model_name = args.model.lower()
+    use_rois = args.rois.lower() == "y"
+    binary_targets = args.binary.lower() == "y"
+    dataset_name = args.dataset.lower()
+    classes = 2 if binary_targets else 7
+
+    # set up save path
+    results_folder_name = f"{model_name}_{'rois' if use_rois else 'full'}_{'binary' if binary_targets else 'multiclass'}"
+    save_location = os.path.join(".", "RESULTS", results_folder_name)
+    os.makedirs(save_location, exist_ok=True)
+
+     # set up logger
+    setup_basic_logger(save_location, 'testing')
+
+    # set up data loaders
+    test_ds = Custom_DS_60(dataset_name, 'test', binary_targets)
+    test_ds_loader = DataLoader(test_ds, batch_size=1, shuffle=False)
+
+    # set up model and load weights
+    model = get_model(model_name, num_classes=classes, use_rois=use_rois)
+    model.load_state_dict(torch.load(os.path.join(save_location, "best_weights.pth")))
+
+    # test model
+    test(model, test_ds_loader, save_location, classes)

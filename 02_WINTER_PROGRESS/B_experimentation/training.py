@@ -43,21 +43,39 @@ def create_metric_plots(metrics_dict, save_path):
     save_path = os.path.join(save_path, "training_plots")
     os.makedirs(save_path, exist_ok=True)
 
-    for key, val in metrics_dict.items():
+    for key, values in metrics_dict.items():
         if key != "Epoch":
             plt.clf()
-            plt.plot(val["Train"])
-            plt.plot(val["Val"])
             plt.title(f"Training {key}")
             plt.ylabel(key)
             plt.xlabel("Epoch")
-            plt.legend(['Train', 'Val'])
+            plt.plot(values["Train"], label="Train")
+            plt.plot(values["Val"], label="Val")
+
+            if key == "Loss":
+                best_score_train = min(values["Train"])
+                best_score_val = min(values["Val"])
+            else:
+                best_score_train = max(values["Train"])
+                best_score_val = max(values["Val"])
+
+            best_epoch_train = values["Train"].index(best_score_train)
+            best_epoch_val = values["Val"].index(best_score_val)
+
+            # plt.axvline(x=best_epoch_train, color='blue', linestyle='--', label='Best Epoch Train')
+            # plt.axvline(x=best_epoch_val, color='orange', linestyle='--', label='Best Epoch Val')
+
+            plt.plot(best_epoch_train, best_score_train, '*', label='Best Epoch Train')
+            plt.plot(best_epoch_val, best_score_val, '*', label='Best Epoch Val')
+
+            plt.legend()
             plt.savefig(os.path.join(save_path, f"{key.lower().split(' ')[0]}_plot.png"))
 
 # ---------- Training Method ---------- #
 
 def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_patience=None):
-    best_epoch, epochs_without_improvement, best_f1_score = 0, 0, 0.0
+    best_f1_epoch, best_jac_epoch, best_loss_epoch, epochs_without_improvement = 0, 0, 0, 0
+    best_f1_score, best_jac_score, best_loss = 0.0, 0.0, 0.0
     losses_train, losses_val = [], []
     f1_train, f1_val = [], []
     jaccard_train, jaccard_val = [], []
@@ -68,30 +86,22 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
     optimizer = torch.optim.AdamW(model.parameters())
 
     # --- iterate through all epochs --- #
-    log_and_print("{} starting training...".format(datetime.now()))
+    log_and_print("{} starting training...\n".format(datetime.now()))
     for epoch in range(n_epochs):
 
         # --- training step --- #
         model.train()
         epoch_loss, epoch_f1, epoch_jac = 0.0, 0.0, 0.0
         for _, _, sample, target in tqdm(train_loader, desc="epoch {} train progress".format(epoch + 1)):
-            # print("\n\n")
-            # print(f"DEBUG: model.use_rois: {model.use_rois}")
-            # print(f"DEBUG: sample shape: {sample.shape}")
-            # print(f"DEBUG: target shape before: {target.shape}")
             target = preprocess_target(target, model.use_rois)
-            # print(f"DEBUG: target shape after: {target.shape}")
-            # postprocess_seg_mask(target, n_classes, model.use_rois)
             output = model(sample)
-            # print(f"DEBUG: output shape before: {output.shape}")
-            # postprocess_seg_mask(output, n_classes, model.use_rois)
-            # print(f"DEBUG: output shape after: {output.shape}")
-            # print("\n\n")
             loss = loss_fn(output, target)
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             epoch_loss += loss.item()
+            target = postprocess_seg_mask(target, n_classes, model.use_rois)
+            output = postprocess_seg_mask(output, n_classes, model.use_rois)
             epoch_f1 += f1_score(output, target, num_classes=n_classes, zero_division=1).item()
             epoch_jac += jaccard_index(output, target, num_classes=n_classes, zero_division=1).item()
             del sample, target, output
@@ -108,6 +118,8 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
                 target = preprocess_target(target, model.use_rois)
                 output = model(sample)
                 epoch_loss += loss_fn(output, target).item()
+                target = postprocess_seg_mask(target, n_classes, model.use_rois)
+                output = postprocess_seg_mask(output, n_classes, model.use_rois)
                 epoch_f1 += f1_score(output, target, num_classes=n_classes, zero_division=1).item()
                 epoch_jac += jaccard_index(output, target, num_classes=n_classes, zero_division=1).item()
                 del sample, target, output
@@ -123,29 +135,36 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
         log_and_print("\t[valid] loss: {:.9f}, f1_score: {:.9f}, jaccard_idx: {:.9f}".format(
             losses_val[epoch], f1_val[epoch], jaccard_val[epoch]))
         
+        # --- update best metrics scores and save weights --- #
+        if losses_val[epoch] < best_loss:
+            best_loss = losses_val[epoch]
+            best_loss_epoch = epoch + 1
+            torch.save(model.state_dict(), os.path.join(save_path, "best_weights.pth"))
+            epochs_without_improvement = 0
+        else:
+            epochs_without_improvement += 1
+
+        if f1_val[epoch] > best_f1_score:
+            best_f1_score = f1_val[epoch]
+            best_f1_epoch = epoch + 1
+
+        if jaccard_val[epoch] > best_jac_score:
+            best_jac_score = jaccard_val[epoch]
+            best_jac_epoch = epoch + 1
+
         # --- check for early stopping --- #
-        if n_patience is not None:
-            if f1_val[epoch] >= best_f1_score:
-                best_epoch = epoch + 1
-                best_f1_score = f1_val[epoch]
-                torch.save(model.state_dict(), os.path.join(save_path, "best_weights.pth"))
-                epochs_without_improvement = 0
-            else:
-                epochs_without_improvement += 1
+        if n_patience is not None and epochs_without_improvement == n_patience:
+            log_and_print("{} early stopping at epoch {}".format(datetime.now(), epoch + 1))
+            break
 
-            if epochs_without_improvement == n_patience:
-                log_and_print("{} early stopping at epoch {}".format(datetime.now(), epoch + 1))
-                break
-
-    # --- save weights --- #
-    log_and_print("{} training complete.".format(datetime.now()))
-    if n_patience is not None:
-        log_and_print("best f1 score: {:.9f}, occurred on epoch {}".format(best_f1_score, best_epoch))
-    else:
-        torch.save(model.state_dict(), os.path.join(save_path, "final_weights.pth"))
+    # --- print best metrics --- #
+    log_and_print("\n{} training complete.\n".format(datetime.now()))
+    log_and_print("lowest loss: {:.9f}, occurred on epoch {}".format(best_loss, best_loss_epoch))
+    log_and_print("highest f1 score: {:.9f}, occurred on epoch {}".format(best_f1_score, best_f1_epoch))
+    log_and_print("highest jaccard idx score: {:.9f}, occurred on epoch {}".format(best_jac_score, best_jac_epoch))
 
     # --- save metrics --- #
-    log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
+    log_and_print("\n{} saving metrics and generating plots...".format(datetime.now()))
     metrics_history = {
         "Epoch": list(range(1, epoch + 1)),
         "Loss": {
@@ -176,7 +195,6 @@ if __name__ == "__main__":
     parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
     parser.add_argument("-epochs", type=int, required=True, help="number of epochs (int)")
     parser.add_argument("-patience", type=int, default=None, help="early stopping patience (int)")
-    parser.add_argument("-seed", type=int, default=None, help="custom seed (int)")
     args = parser.parse_args()
 
     # get hyperparameters
@@ -186,7 +204,6 @@ if __name__ == "__main__":
     dataset_name = args.dataset.lower()
     epochs = args.epochs
     patience = args.patience
-    seed = args.seed if args.seed is not None else get_random_seed()
     classes = 2 if binary_targets else 7
 
     # set up save path
@@ -195,6 +212,7 @@ if __name__ == "__main__":
     os.makedirs(save_location, exist_ok=True)
 
     # set up seed for reproducibility
+    seed = get_seed_from_dataset(dataset_name)
     make_deterministic(seed)
 
      # set up logger
@@ -217,8 +235,8 @@ if __name__ == "__main__":
     })
 
     # set up data loaders
-    train_ds = Custom_DS_60(dataset_name, 'train', use_rois, binary_targets)
-    val_ds = Custom_DS_60(dataset_name, 'val', use_rois, binary_targets)
+    train_ds = Custom_DS_60(dataset_name, 'train', binary_targets)
+    val_ds = Custom_DS_60(dataset_name, 'val', binary_targets)
     train_ds_loader = DataLoader(train_ds, batch_size=1, shuffle=False)
     val_ds_loader = DataLoader(val_ds, batch_size=1, shuffle=False)
 

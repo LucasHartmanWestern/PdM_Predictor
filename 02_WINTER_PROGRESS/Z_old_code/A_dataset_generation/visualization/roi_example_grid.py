@@ -19,7 +19,7 @@ def imshow_and_wait(img):
 if __name__ == '__main__':
     
     # hyperparameters
-    input_path = '/Users/nick_1/PycharmProjects/UWO Masters/PdM_Predictor/1B_synthetic_rain/image_files/input_sample.png'
+    input_path = '/Users/nick_1/PycharmProjects/UWO Masters/PdM_Predictor/01_FALL_PROGRESS/1B_synthetic_rain/image_files/input_sample.png'
     input_im = cv2.imread(input_path, cv2.IMREAD_COLOR)
 
     # ----- ----- ----- #

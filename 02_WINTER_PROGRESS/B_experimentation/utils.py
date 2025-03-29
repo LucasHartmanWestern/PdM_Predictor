@@ -76,6 +76,14 @@ def make_deterministic(seed):
     torch.manual_seed(seed)
     torch.cuda.manual_seed(seed)
 
+
+def get_seed_from_dataset(ds_folder_name):
+    dataset_path = get_dataset_path(ds_folder_name)
+    seed_path = os.path.join(dataset_path, 'dataset_seed.txt')
+    with open(seed_path, 'r') as f:
+        seed = int(f.read().strip())
+    return seed
+
 # ---------- Dataset Path Methods ---------- #
 
 def get_dataset_path(ds_folder_name):

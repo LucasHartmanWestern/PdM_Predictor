@@ -11,10 +11,13 @@ from tqdm import tqdm
 # ---------- Global Constants ---------- #
 
 NUM_DAYS = 60
+CROP_AMOUNT = 60
 
 TILE_DIMS = (36, 20)
 IMG_DIMS = (1080, 1920)
 IMG_DIMS_RGB = (1080, 1920, 3)
+CROPPED_IMG_DIMS = (1080, 1800)
+CROPPED_IMG_DIMS_RGB = (1080, 1800, 3)
 MATRIX_DIMS = (IMG_DIMS[0] // TILE_DIMS[0], IMG_DIMS[1] // TILE_DIMS[1])
 
 PARTITIONS = ['train', 'val', 'test']
@@ -31,23 +34,29 @@ def imshow_and_wait(img):
         quit()
 
 
-def get_seeds(custom_seed=None):
+def get_seeds(save_path, custom_dataset_seed=None):
     '''
-    Generates a primary seed and 3 secondary seeds for each partition.
-    '''
-    primary_seed = custom_seed if custom_seed is not None else int.from_bytes(os.urandom(2), byteorder="big")
-    random.seed(primary_seed)
-    secondary_seeds = [random.randint(10000, 99999) for _ in range(3)]
-    return primary_seed, secondary_seeds
+    Generates a dataset seed and 3 partition seeds for training, validation, and testing.
 
+    Also writes the dataset seed to a file located at <save_path>/dataset_seed.txt
+    '''
+    # generate dataset seed
+    if custom_dataset_seed is None:
+        dataset_seed = int.from_bytes(os.urandom(4), byteorder="big")
+    else:
+        dataset_seed = custom_dataset_seed
 
-def seed_algorithm(primary_seed, secondary_seed):
-    '''
-    Seeds the random number generator for the current partition.
-    '''
-    seed = str(primary_seed) + str(secondary_seed)
-    random.seed(seed)
-    return seed
+    # write dataset seed to file
+    file_path = os.path.join(save_path, 'dataset_seed.txt')
+    open(file_path, 'w+').close()
+    with open(file_path, 'w') as f:
+        f.write(f"{dataset_seed}\n")
+
+    # generate partition seeds
+    random.seed(dataset_seed)
+    partition_seeds = [random.randint(100000000, 999999999) for _ in range(3)]
+
+    return dataset_seed, partition_seeds
 
 
 def create_folder_structure(save_path):
@@ -185,7 +194,7 @@ def gen_fouling_imgs(save_path, tile_im_path, num_intensities, show=False):
             cv2.imwrite(os.path.join(fouling_path, file.replace('tile_matrix_', 'fouling_')), fouling_im)
 
 
-def gen_targets(save_path, metal_mask, include_metal_class=True, show=False):
+def gen_targets(save_path, metal_mask, crop_width, include_metal_class=True, show=False):
     multiclass_target_path = os.path.join(save_path, 'targets', 'multiclass')
     binary_target_path = os.path.join(save_path, 'targets', 'binary')
     tile_matrices_path = os.path.join(save_path, 'components', 'tile_matrices')
@@ -212,12 +221,19 @@ def gen_targets(save_path, metal_mask, include_metal_class=True, show=False):
             if show:
                 visualize_target(target)
 
+            # crop target images if specified
+            if crop_width:
+                target = target[:, CROP_AMOUNT:target.shape[1]-CROP_AMOUNT]
+                binary_target = binary_target[:, CROP_AMOUNT:binary_target.shape[1]-CROP_AMOUNT]
+                assert target.shape == CROPPED_IMG_DIMS, f"Target image shape is {target.shape}, expected {CROPPED_IMG_DIMS}"
+                assert binary_target.shape == CROPPED_IMG_DIMS, f"Binary Target image shape is {binary_target.shape}, expected {CROPPED_IMG_DIMS}"
+
             # save target images
             cv2.imwrite(os.path.join(multiclass_target_path, file.replace('tile_matrix_', 'target_')), target)
             cv2.imwrite(os.path.join(binary_target_path, file.replace('tile_matrix_', 'target_')), binary_target)
 
 
-def gen_samples(save_path, src_imgs_path, metal_mask, show=False):
+def gen_samples(save_path, src_imgs_path, metal_mask, crop_width, show=False):
     samples_path = os.path.join(save_path, 'samples')
     fouling_path = os.path.join(save_path, 'components', 'fouling')
 
@@ -243,6 +259,11 @@ def gen_samples(save_path, src_imgs_path, metal_mask, show=False):
                 if show:
                     imshow_and_wait(sample)
 
+                # crop sample images if specified
+                if crop_width:
+                    sample = sample[:, CROP_AMOUNT:sample.shape[1]-CROP_AMOUNT, :]
+                    assert sample.shape == CROPPED_IMG_DIMS_RGB, f"Sample image shape is {sample.shape}, expected {CROPPED_IMG_DIMS_RGB}"
+
                 # save completed sample image
                 cv2.imwrite(os.path.join(samples_path, f"sample_{day}_{hour}.png"), sample)
 
@@ -259,8 +280,9 @@ def gen_ds_lists(save_path):
                 sample_path = f"samples/sample_{day}_{hour}.png"
                 binary_target_path = f"targets/binary/target_{day}.png"
                 multiclass_target_path = f"targets/multiclass/target_{day}.png"
-                f1.write(f"{sample_path},{binary_target_path}\n")
-                f2.write(f"{sample_path},{multiclass_target_path}\n")
+                if os.path.exists(os.path.join(save_path, sample_path)):
+                    f1.write(f"{sample_path},{binary_target_path}\n")
+                    f2.write(f"{sample_path},{multiclass_target_path}\n")
 
 # ---------- Dataset Generation Method ---------- #
 
@@ -273,11 +295,14 @@ def gen_new_dataset(
         max_new_tiles_per_time_step=10, 
         fouling_intensity_levels=5,
         include_metal_class=True,
+        crop_image_widths=True,
         tile_im_path='dust1.png',
         metal_mask_path='metal_seg_mask_inv.png',
 ):
+    os.makedirs(ds_path, exist_ok=True)
+    
     # create main seed
-    main_seed, sub_seeds = get_seeds(custom_seed)
+    ds_seed, partition_seeds = get_seeds(ds_path, custom_seed)
 
     # iterate over partitions
     for i in range(len(PARTITIONS)):
@@ -286,7 +311,7 @@ def gen_new_dataset(
         # create save path and seed algorithm for current partition
         save_path = os.path.join(ds_path, PARTITIONS[i])
         create_folder_structure(save_path)
-        seed_algorithm(main_seed, sub_seeds[i])
+        random.seed(partition_seeds[i])
 
         # determine number of tile seed points
         num_tile_seed_points = max_seed_points if min_seed_points is None else random.randint(min_seed_points, max_seed_points)
@@ -295,10 +320,10 @@ def gen_new_dataset(
         file_path = os.path.join(save_path, 'hyperparameters.txt')
         open(file_path, 'w+').close()
         with open(file_path, 'w') as f:
+            f.write(f"\n--- {PARTITIONS[i]} partition ---\n")
             f.write(f"\nReproducibility:\n")
-            f.write(f"\tmain-seed (dataset seed): {main_seed}\n")
-            f.write(f"\tsub-seed (partition seed): {sub_seeds[i]}\n")
-            f.write(f"\tfull seed: {str(main_seed) + str(sub_seeds[i])}\n")
+            f.write(f"\tDataset seed: {ds_seed}\n")
+            f.write(f"\tPartition seed: {partition_seeds[i]}\n")
             f.write(f"\nAlgorithm Parameters:\n")
             f.write(f"\tnum time steps: {NUM_DAYS}\n")
             f.write(f"\tnum tile seed points: {num_tile_seed_points}\n")
@@ -312,12 +337,11 @@ def gen_new_dataset(
 
         # generate full-size targets and samples
         metal_mask = cv2.imread(metal_mask_path, cv2.IMREAD_GRAYSCALE)
-        gen_targets(save_path, metal_mask, include_metal_class)
-        gen_samples(save_path, src_imgs_path, metal_mask)
+        gen_targets(save_path, metal_mask, crop_image_widths, include_metal_class)
+        gen_samples(save_path, src_imgs_path, metal_mask, crop_image_widths)
         gen_ds_lists(save_path)
 
     print('\n--- New Dataset Generated ---\n')
-
 
 # ---------- Main Method ---------- #
 
@@ -325,7 +349,7 @@ if __name__ == '__main__':
     
     # hyperparameters
     src_folder_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60/src_images'
-    dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60/mar20_ds2'
+    dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60/mar28_ds1'
     
     # ----- ----- ----- #
 
