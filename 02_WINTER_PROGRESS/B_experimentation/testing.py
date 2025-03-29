@@ -79,8 +79,11 @@ def test(model, test_loader, save_path, n_classes):
     model.eval()
     with torch.no_grad():
         for day_num, hour_num, sample, target in tqdm(test_loader, desc="testing progress"):
-            metrics_history["Day"].append(day_num.item())
-            metrics_history["Hour"].append(hour_num.item())
+            day_num = day_num.tolist()
+            hour_num = hour_num.tolist()
+            print(day_num, hour_num)
+            metrics_history["Day"].append(day_num)
+            metrics_history["Hour"].append(hour_num)
             target = preprocess_target(target, model.use_rois)
             output = model(sample)
             target = postprocess_seg_mask(target, n_classes, model.use_rois)
