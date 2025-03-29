@@ -128,7 +128,7 @@ def postprocess_seg_mask(output_image: torch.Tensor, num_classes: int, use_rois:
             # output image format
             assert output_image.shape == (num_classes, 1080, 1800), "ERROR: output image is wrong shape: {}".format(output_image.shape)
             result = np.zeros(IMG_DIMS_CROPPED)
-            for ch in range(result.shape[0]):
+            for ch in range(output_image.shape[0]):
                 result[output_image[ch, :, :] > 0] = ch
 
         else:
