@@ -32,9 +32,8 @@ def save_metrics_CSV(metrics_dict, save_path, n_classes):
         for i in range(len(metrics_dict['Day'])):
             row = [metrics_dict['Day'][i], metrics_dict['Hour'][i]]
             for metric_name in metrics_dict.keys():
-                if metric_name != 'Day' or metric_name != 'Hour':  # Skip the day and hour key
+                if metric_name != 'Day' and metric_name != 'Hour':  # Skip the day and hour key
                     for class_idx in range(n_classes):
-                        print(metrics_dict[metric_name][class_idx][i])
                         row.append(metrics_dict[metric_name][class_idx][i])
             writer.writerow(row)
 
