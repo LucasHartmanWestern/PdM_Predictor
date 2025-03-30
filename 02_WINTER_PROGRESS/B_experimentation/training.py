@@ -173,7 +173,7 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
     # --- save metrics --- #
     log_and_print("\n{} saving metrics and generating plots...".format(datetime.now()))
     metrics_history = {
-        "Epoch": list(range(1, epoch + 1)),
+        "Epoch": list(range(1, epoch + 2)),
         "Loss": {
             "Train": losses_train, 
             "Val": losses_val
