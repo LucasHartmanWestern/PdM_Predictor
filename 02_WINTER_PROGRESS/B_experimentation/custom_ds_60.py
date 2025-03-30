@@ -11,7 +11,7 @@ from utils import get_dataset_path, fix_path
 class Custom_DS_60(Dataset):
     def __init__(self, ds_folder_name, partition_name, binary_targets):
         assert partition_name in ['train', 'val', 'test'], "ERROR: Invalid partition name for custom dataset"
-        day_interval = 4 if partition_name == 'val' else 1
+        day_interval = 2 if partition_name == 'val' else 1
 
         # initialize private variables
         self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
