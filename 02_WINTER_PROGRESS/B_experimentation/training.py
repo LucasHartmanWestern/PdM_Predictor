@@ -28,10 +28,6 @@ def save_metrics_CSV(metrics_dict, save_path):
         writer.writerow(headers)
         
         # Write data rows
-        print(f"metrics_dict['Epoch']: {metrics_dict['Epoch']}")
-        print(f"metrics_dict[metric_name]['Val']: {metrics_dict[metric_name]['Val']}")
-        print(f"len(metrics_dict['Epoch']): {len(metrics_dict['Epoch'])}")
-        print(f"len(metrics_dict[metric_name]['Val']): {len(metrics_dict[metric_name]['Val'])}")
         for i in range(len(metrics_dict['Epoch'])):
             row = [metrics_dict['Epoch'][i]]
             for metric_name in metrics_dict.keys():
