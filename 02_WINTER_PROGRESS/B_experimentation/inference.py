@@ -29,13 +29,15 @@ def run_inference(ds_name):
 
                 # load model with weights
                 model = get_model(model_name, num_classes=classes, use_rois=use_rois)
-                model.load_state_dict(torch.load(weights_file, map_location=torch.device('cpu'), weights_only=True))
+                model.load_state_dict(torch.load(weights_file, weights_only=True))
+                model.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
                 
                 # run inference for this model
                 model.eval()
                 with torch.no_grad():
                     for day_num, hour_num, sample, _ in tqdm(test_loader, desc=f"[{model_count}/8] {save_path.split('/')[-2]}"):
                         save_file_path = os.path.join(save_path, f"output_{day_num.item()}_{hour_num[0]}.png")
+                        sample = sample.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
                         output = model(sample)
                         output = postprocess_seg_mask(output, classes, model.use_rois)
                         cv2.imwrite(save_file_path, visualize_seg_mask(output, classes))
