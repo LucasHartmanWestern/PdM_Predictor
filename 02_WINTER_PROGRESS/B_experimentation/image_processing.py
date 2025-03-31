@@ -26,13 +26,16 @@ def imshow_and_wait(img):
         quit()
 
 
-def visualize_seg_mask(img, num_classes=None):
-    img_copy = img.copy()
+def visualize_seg_mask(img: torch.Tensor, num_classes=None, show=False):
+    img_copy = torch.squeeze(img, 0).detach().cpu().numpy().copy()
+    assert img_copy.shape == IMG_DIMS_CROPPED, f"ERROR: seg mask shape is wrong: {img_copy.shape}"
     img_copy = img_copy.astype(np.float32)
     unique_vals = np.unique(img_copy).shape[0]-1 if num_classes is None else num_classes-1
     img_copy *= (255.0/unique_vals)
     img_copy = img_copy.astype(np.uint8)
-    imshow_and_wait(img_copy)
+    if show:
+        imshow_and_wait(img_copy)
+    return img_copy
 
 
 def preprocess_target(target: torch.Tensor, use_rois: bool, resize_shape=None, verbose=False):
@@ -90,7 +93,7 @@ def preprocess_sample(sample: torch.Tensor, use_rois: bool, resize_shape=None, v
     return result
 
 
-def postprocess_seg_mask(output_image: torch.Tensor, num_classes: int, use_rois: bool, verbose=False, show=False):
+def postprocess_seg_mask(output_image: torch.Tensor, num_classes: int, use_rois: bool, verbose=False):
     start_time = time.time()
     if use_rois:
         # re-stitching ROIs into full image
@@ -142,10 +145,8 @@ def postprocess_seg_mask(output_image: torch.Tensor, num_classes: int, use_rois:
         print(f"DEBUG: seg mask unique values: {np.unique(result)}")
         print(f"DEBUG: Time taken to postprocess seg mask: {time.time() - start_time} seconds")
 
-    if show:
-        visualize_seg_mask(result, num_classes)
-
     result = np.expand_dims(result, axis=0)
     result = torch.from_numpy(result).type(torch.FloatTensor)
     return result.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
+
 

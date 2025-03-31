@@ -11,7 +11,7 @@ from utils import *
 from custom_ds_60 import Custom_DS_60
 from image_processing import preprocess_target, postprocess_seg_mask
 
-# ---------- Training Helper Methods ---------- #
+# ---------- Helper Methods ---------- #
 
 def save_metrics_CSV(metrics_dict, save_path):
     # Create headers
@@ -227,20 +227,20 @@ if __name__ == "__main__":
         "Model": model_name,
         "Epochs": epochs,
         "Patience": patience,
-        "Batch Size": "1 (hard-coded)",
         "Binary Targets": binary_targets,
         "Number of Classes": classes,
         "Using ROIs": use_rois,
+        "Dataset Name": dataset_name,
+        "Save Path": save_location,
+        "Batch Size": "1 (hard-coded)",
         "Optimizer": "AdamW (hard-coded)",
         "Loss Function": "Cross Entropy Loss (hard-coded)",
-        "Dataset Name": dataset_name,
-        "Save Path": save_location
     })
 
     # set up data loaders
     train_ds = Custom_DS_60(dataset_name, 'train', binary_targets)
     val_ds = Custom_DS_60(dataset_name, 'val', binary_targets)
-    train_ds_loader = DataLoader(train_ds, batch_size=1, shuffle=False)
+    train_ds_loader = DataLoader(train_ds, batch_size=1, shuffle=True)
     val_ds_loader = DataLoader(val_ds, batch_size=1, shuffle=False)
 
     # set up model and train

@@ -1,1 +1,0 @@
-python testing.py -model cgnet -rois y -binary n -dataset mar28_ds1

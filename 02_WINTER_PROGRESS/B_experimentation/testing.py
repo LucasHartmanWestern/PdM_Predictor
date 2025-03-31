@@ -11,7 +11,7 @@ from utils import *
 from image_processing import preprocess_target, postprocess_seg_mask
 from custom_ds_60 import Custom_DS_60
 
-# ---------- Testing Helper Methods ---------- #
+# ---------- Helper Methods ---------- #
 
 def save_metrics_CSV(metrics_dict, save_path, n_classes):
     # Create headers
@@ -59,7 +59,7 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
     plt.savefig(os.path.join(save_path, "f1_bar_plot.png"))
 
 
-# ---------- Testing Main Methods ---------- #
+# ---------- Testing Method ---------- #
 
 def test(model, test_loader, save_path, n_classes):
     metrics_history = {
@@ -111,6 +111,7 @@ def test(model, test_loader, save_path, n_classes):
     create_metric_plots(metrics_history, save_path, n_classes)
     log_and_print("{} testing script finished.\n".format(datetime.now()))
 
+# ---------- Main Method ---------- #
 
 if __name__ == "__main__":
     # get command line arguments
@@ -131,10 +132,10 @@ if __name__ == "__main__":
     # set up save path
     results_folder_name = f"{model_name}_{'rois' if use_rois else 'full'}_{'binary' if binary_targets else 'multiclass'}"
     save_location = os.path.join(".", "RESULTS", results_folder_name)
-    os.makedirs(save_location, exist_ok=True)
 
      # set up logger
     setup_basic_logger(save_location, 'testing')
+    log_and_print(f"\n--- Testing {results_folder_name} ---\n")
 
     # set up data loaders
     test_ds = Custom_DS_60(dataset_name, 'test', binary_targets)
@@ -142,7 +143,7 @@ if __name__ == "__main__":
 
     # set up model and load weights
     model = get_model(model_name, num_classes=classes, use_rois=use_rois)
-    model.load_state_dict(torch.load(os.path.join(save_location, "best_weights.pth")))
+    model.load_state_dict(torch.load(os.path.join(save_location, "best_weights.pth"), weights_only=True))
 
     # test model
     test(model, test_ds_loader, save_location, classes)

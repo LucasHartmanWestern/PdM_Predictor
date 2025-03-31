@@ -1,1 +1,0 @@
-python training.py -model cgnet -rois y -binary n -dataset mar28_ds1 -epochs 3 -patience 3
