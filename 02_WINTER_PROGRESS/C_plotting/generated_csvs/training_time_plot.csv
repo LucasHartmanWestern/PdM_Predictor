@@ -1,0 +1,9 @@
+model,roi_mode,target_mode,training_time
+cgnet,rois,binary,0:21:54.063183
+cgnet,rois,multiclass,0:20:29.469675
+cgnet,full,binary,0:04:17.656528
+cgnet,full,multiclass,0:08:23.057947
+unet,rois,binary,1:28:39.426756
+unet,rois,multiclass,1:24:26.789625
+unet,full,binary,1:24:13.778067
+unet,full,multiclass,0:51:52.707797

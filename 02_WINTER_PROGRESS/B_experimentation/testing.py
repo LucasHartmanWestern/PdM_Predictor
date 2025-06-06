@@ -75,6 +75,7 @@ def test(model, test_loader, save_path, n_classes):
     model.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
 
     # --- iterate through all test samples --- #
+    start_time = datetime.now()
     log_and_print("{} starting testing...\n".format(datetime.now()))
     model.eval()
     with torch.no_grad():
@@ -105,7 +106,9 @@ def test(model, test_loader, save_path, n_classes):
             class_idx, mean_f1, std_f1, mean_jac, std_jac))
 
     # --- save metrics --- #
+    total_testing_time = datetime.now() - start_time
     log_and_print("\n{} testing complete.".format(datetime.now()))
+    log_and_print("total testing time: {}".format(total_testing_time))
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
     save_metrics_CSV(metrics_history, save_path, n_classes)
     create_metric_plots(metrics_history, save_path, n_classes)
@@ -120,6 +123,7 @@ if __name__ == "__main__":
     parser.add_argument("-rois", type=str, required=True, help="use rois (y/n)")
     parser.add_argument("-binary", type=str, required=True, help="use binary targets (y/n)")
     parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
+    parser.add_argument("-trial", type=int, required=True, help="trial number (int)")
     args = parser.parse_args()
 
     # get hyperparameters
@@ -127,11 +131,12 @@ if __name__ == "__main__":
     use_rois = args.rois.lower() == "y"
     binary_targets = args.binary.lower() == "y"
     dataset_name = args.dataset.lower()
+    trial = args.trial
     classes = 2 if binary_targets else 7
 
     # set up save path
     results_folder_name = f"{model_name}_{'rois' if use_rois else 'full'}_{'binary' if binary_targets else 'multiclass'}"
-    save_location = os.path.join(".", "RESULTS", results_folder_name)
+    save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name)
 
      # set up logger
     setup_basic_logger(save_location, 'testing')

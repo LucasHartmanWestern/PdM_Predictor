@@ -349,7 +349,7 @@ if __name__ == '__main__':
     
     # hyperparameters
     src_folder_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60/src_images'
-    dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60/mar28_ds1'
+    dataset_path = '/Users/nick_1/PycharmProjects/UWO Masters/data_60/mar28_ds3'
     
     # ----- ----- ----- #
 

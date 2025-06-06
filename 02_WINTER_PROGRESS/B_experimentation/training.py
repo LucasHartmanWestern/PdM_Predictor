@@ -89,6 +89,7 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
     optimizer = torch.optim.AdamW(model.parameters())
 
     # --- iterate through all epochs --- #
+    start_time = datetime.now()
     log_and_print("{} starting training...\n".format(datetime.now()))
     for epoch in range(n_epochs):
 
@@ -142,6 +143,7 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
         if epoch == 0 or losses_val[epoch] < best_loss:
             best_loss = losses_val[epoch]
             best_loss_epoch = epoch + 1
+            model_training_time = datetime.now() - start_time
             torch.save(model.state_dict(), os.path.join(save_path, "best_weights.pth"))
             epochs_without_improvement = 0
         else:
@@ -160,8 +162,11 @@ def train(model, n_classes, train_loader, val_loader, save_path, n_epochs, n_pat
             log_and_print("{} early stopping at epoch {}".format(datetime.now(), epoch + 1))
             break
 
-    # --- print best metrics --- #
+    # --- print best metrics and training time --- #
+    total_training_time = datetime.now() - start_time
     log_and_print("\n{} training complete.\n".format(datetime.now()))
+    log_and_print("model training time: {}".format(model_training_time))
+    log_and_print("total training time: {}".format(total_training_time))
     log_and_print("lowest loss: {:.9f}, occurred on epoch {}".format(best_loss, best_loss_epoch))
     log_and_print("highest f1 score: {:.9f}, occurred on epoch {}".format(best_f1_score, best_f1_epoch))
     log_and_print("highest jaccard idx score: {:.9f}, occurred on epoch {}".format(best_jac_score, best_jac_epoch))
@@ -198,6 +203,7 @@ if __name__ == "__main__":
     parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
     parser.add_argument("-epochs", type=int, required=True, help="number of epochs (int)")
     parser.add_argument("-patience", type=int, default=None, help="early stopping patience (int)")
+    parser.add_argument("-trial", type=int, default=None, help="trial number (int)")
     args = parser.parse_args()
 
     # get hyperparameters
@@ -207,11 +213,12 @@ if __name__ == "__main__":
     dataset_name = args.dataset.lower()
     epochs = args.epochs
     patience = args.patience
+    trial = args.trial
     classes = 2 if binary_targets else 7
 
     # set up save path
     results_folder_name = f"{model_name}_{'rois' if use_rois else 'full'}_{'binary' if binary_targets else 'multiclass'}"
-    save_location = os.path.join(".", "RESULTS", results_folder_name)
+    save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name)
     os.makedirs(save_location, exist_ok=True)
 
     # set up seed for reproducibility
