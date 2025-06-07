@@ -92,7 +92,7 @@ if __name__ == "__main__":
     parser.add_argument("-model", type=str, required=True, help="model name (str)")
     parser.add_argument("-rois", type=str, required=True, help="use rois (y/n)")
     # parser.add_argument("-binary", type=str, required=True, help="use binary targets (y/n)")
-    # parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
+    parser.add_argument("-dataset", type=str, required=True, help="dataset folder name (str)")
     parser.add_argument("-trial", type=int, required=True, help="trial number (int)")
     args = parser.parse_args()
 
@@ -103,22 +103,35 @@ if __name__ == "__main__":
     use_rois = args.rois.lower() == "y"
     # binary_targets = args.binary.lower() == "y"
     binary_targets = True
-    # dataset_name = args.dataset.lower()
-    dataset_name = 'mar28_ds4'
+    dataset_name = args.dataset.lower()
     trial = args.trial
     classes = 2 if binary_targets else 7
 
+    # make extra testing folder for SMS and CGS
+    subfolder = ''
+    if dataset_name == 'mar28_ds4': # for SMS Testing
+        subfolder = 'SMS_Test_Results'
+    elif dataset_name == 'mar28_ds5': # for CGS Testing
+        subfolder = 'CGS_Test_Results'
+
     # set up save path
     results_folder_name = f"{model_name}_{'rois' if use_rois else 'full'}_{'binary' if binary_targets else 'multiclass'}"
-    save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name)
+    if subfolder != '':
+        save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name, subfolder)
+    else:
+        save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name)
 
      # set up logger
     setup_basic_logger(save_location, 'testing')
     log_and_print(f"\n--- Testing {results_folder_name} ---\n")
 
     # set up data loaders
-    # test_ds = Custom_DS_60(dataset_name, 'test', binary_targets)
-    test_ds = Custom_DS_60_TEST(dataset_name, binary_targets)
+    if dataset_name == 'mar28_ds4': # for SMS Testing
+        test_ds = Custom_DS_60_TEST(dataset_name, binary_targets)
+    elif dataset_name == 'mar28_ds5': # for CGS Testing
+        test_ds = Custom_DS_60(dataset_name, 'test', binary_targets)
+    else:
+        test_ds = Custom_DS_60(dataset_name, 'test', binary_targets)
     test_ds_loader = DataLoader(test_ds, batch_size=1, shuffle=False)
 
     # set up model and load weights
