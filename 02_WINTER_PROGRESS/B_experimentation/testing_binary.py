@@ -4,7 +4,7 @@ from datetime import datetime
 
 import torch
 from torch.utils.data import DataLoader
-from torchmetrics.functional.classification import multiclass_f1_score as f1_score, multiclass_jaccard_index as jaccard_index, binary_confusion_matrix as confusion_matrix
+from torchmetrics.functional.classification import binary_f1_score as f1_score, binary_jaccard_index as jaccard_index, binary_confusion_matrix as confusion_matrix
 from tqdm import tqdm
 
 from utils import *
@@ -14,13 +14,9 @@ from custom_ds_60_TEST import Custom_DS_60_TEST
 
 # ---------- Helper Methods ---------- #
 
-def save_metrics_CSV(metrics_dict, save_path, n_classes):
+def save_metrics_CSV(metrics_dict, save_path):
     # Create headers
-    headers = ['Day', 'Hour']
-    for metric_name in metrics_dict.keys():
-        if metric_name != 'Day' and metric_name != 'Hour':  # Skip the day and hour key
-            for class_idx in range(n_classes):
-                headers.append(f'Class {class_idx} {metric_name}')
+    headers = ['Day', 'Hour', 'F1 Score', 'Jaccard Index', 'TP', 'FP', 'FN', 'TN']
     
     # Create the CSV file
     filepath = os.path.join(save_path, 'testing_metrics.csv')
@@ -31,33 +27,10 @@ def save_metrics_CSV(metrics_dict, save_path, n_classes):
         
         # Write data rows
         for i in range(len(metrics_dict['Day'])):
-            row = [metrics_dict['Day'][i], metrics_dict['Hour'][i]]
+            row = []
             for metric_name in metrics_dict.keys():
-                if metric_name != 'Day' and metric_name != 'Hour':  # Skip the day and hour key
-                    for class_idx in range(n_classes):
-                        row.append(metrics_dict[metric_name][class_idx][i])
+                row.append(metrics_dict[metric_name][i])
             writer.writerow(row)
-
-
-def create_metric_plots(metrics_dict, save_path, n_classes):
-    save_path = os.path.join(save_path, "testing_plots")
-    os.makedirs(save_path, exist_ok=True)
-
-    # per-class f1 score bar plot
-    plt.clf()
-    mean_f1_scores = []
-    for class_idx in range(n_classes):
-        class_f1_scores = []
-        for i in range(len(metrics_dict["Day"])):
-            class_f1_scores.append(metrics_dict["F1 Score"][class_idx][i])
-        mean_f1_scores.append(np.mean(class_f1_scores))
-
-    bar_container = plt.bar(range(n_classes), mean_f1_scores)
-    plt.bar_label(bar_container, fmt="{:.2f}")
-    plt.title("Mean Testing F1 Score by Class")
-    plt.xlabel("Class")
-    plt.ylabel("F1 Score")
-    plt.savefig(os.path.join(save_path, "f1_bar_plot.png"))
 
 
 # ---------- Testing Method ---------- #
@@ -66,12 +39,10 @@ def test(model, test_loader, save_path, n_classes):
     metrics_history = {
         "Hour": [],
         "Day": [],
-        "F1 Score": {},
-        "Jaccard Index": {}
+        "F1 Score": [],
+        "Jaccard Index": [],
+        "TP": [], "FP": [], "FN": [], "TN": []
     }
-    for class_idx in range(n_classes):
-        metrics_history["F1 Score"][class_idx] = []
-        metrics_history["Jaccard Index"][class_idx] = []
 
     model.to(device=torch.device('cuda:1' if torch.cuda.is_available() else 'cpu'))
 
@@ -87,32 +58,30 @@ def test(model, test_loader, save_path, n_classes):
             output = model(sample)
             target = postprocess_seg_mask(target, n_classes, model.use_rois)
             output = postprocess_seg_mask(output, n_classes, model.use_rois)
-            f1_scores = f1_score(output, target, num_classes=n_classes, average="none", zero_division=1.0).tolist()
-            jac_scores = jaccard_index(output, target, num_classes=n_classes, average="none", zero_division=1.0).tolist()
-            assert len(f1_scores) == len(jac_scores) == n_classes, "ERROR: f1_scores and jac_scores must have length n_classes"
-            for class_idx in range(n_classes):
-                metrics_history["F1 Score"][class_idx].append(f1_scores[class_idx])
-                metrics_history["Jaccard Index"][class_idx].append(jac_scores[class_idx])
+
+            metrics_history["F1 Score"].append(f1_score(output, target).item())
+            metrics_history["Jaccard Index"].append(jaccard_index(output, target).item())
+
+            conf_mat = confusion_matrix(output, target).tolist()
+            metrics_history["TP"].append(conf_mat[0][0])
+            metrics_history["FP"].append(conf_mat[0][1])
+            metrics_history["FN"].append(conf_mat[1][0])
+            metrics_history["TN"].append(conf_mat[1][1])
 
             del day_num, hour_num, sample, target, output
 
     # --- print results --- #
     log_and_print("\n{} mean testing metrics:".format(datetime.now()))
-    for class_idx in range(n_classes):
-        mean_f1 = np.mean(metrics_history["F1 Score"][class_idx])
-        std_f1 = np.std(metrics_history["F1 Score"][class_idx])
-        mean_jac = np.mean(metrics_history["Jaccard Index"][class_idx])
-        std_jac = np.std(metrics_history["Jaccard Index"][class_idx])
-        log_and_print("\t[class_{}] f1_score: {:.9f} +/- {:.5f}, jaccard_idx: {:.9f} +/- {:.5f}".format(
-            class_idx, mean_f1, std_f1, mean_jac, std_jac))
+    log_and_print("\tf1_score: {:.9f} +/- {:.5f}, jaccard_idx: {:.9f} +/- {:.5f}".format(
+        np.mean(metrics_history["F1 Score"]), np.std(metrics_history["F1 Score"]), 
+        np.mean(metrics_history["Jaccard Index"]), np.std(metrics_history["Jaccard Index"])))
 
     # --- save metrics --- #
     total_testing_time = datetime.now() - start_time
     log_and_print("\n{} testing complete.".format(datetime.now()))
     log_and_print("total testing time: {}".format(total_testing_time))
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
-    save_metrics_CSV(metrics_history, save_path, n_classes)
-    create_metric_plots(metrics_history, save_path, n_classes)
+    save_metrics_CSV(metrics_history, save_path)
     log_and_print("{} testing script finished.\n".format(datetime.now()))
 
 # ---------- Main Method ---------- #
@@ -127,13 +96,13 @@ if __name__ == "__main__":
     parser.add_argument("-trial", type=int, required=True, help="trial number (int)")
     args = parser.parse_args()
 
-    # THIS IS FOR MULTICLASS TARGETS ONLY!!!
+    # THIS IS FOR BINARY TARGETS ONLY!!!
 
     # get hyperparameters
     model_name = args.model.lower()
     use_rois = args.rois.lower() == "y"
     # binary_targets = args.binary.lower() == "y"
-    binary_targets = False
+    binary_targets = True
     # dataset_name = args.dataset.lower()
     dataset_name = 'mar28_ds4'
     trial = args.trial

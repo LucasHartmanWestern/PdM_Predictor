@@ -1,33 +1,32 @@
-python testing.py -model unet -rois n -binary n -dataset mar28_ds1 -trial 1
-python testing.py -model unet -rois y -binary n -dataset mar28_ds1 -trial 1
-python testing.py -model unet -rois n -binary y -dataset mar28_ds1 -trial 1
-python testing.py -model unet -rois y -binary y -dataset mar28_ds1 -trial 1
+python testing_binary.py -model unet -rois n -trial 1
+python testing_binary.py -model cgnet -rois n -trial 1
 
-python testing.py -model cgnet -rois n -binary n -dataset mar28_ds1 -trial 1
-python testing.py -model cgnet -rois y -binary n -dataset mar28_ds1 -trial 1
-python testing.py -model cgnet -rois n -binary y -dataset mar28_ds1 -trial 1
-python testing.py -model cgnet -rois y -binary y -dataset mar28_ds1 -trial 1
+python testing_binary.py -model unet -rois n -trial 2
+python testing_binary.py -model cgnet -rois n -trial 2
 
-
-
-python testing.py -model unet -rois n -binary n -dataset mar28_ds2 -trial 2
-python testing.py -model unet -rois y -binary n -dataset mar28_ds2 -trial 2
-python testing.py -model unet -rois n -binary y -dataset mar28_ds2 -trial 2
-python testing.py -model unet -rois y -binary y -dataset mar28_ds2 -trial 2
-
-python testing.py -model cgnet -rois n -binary n -dataset mar28_ds2 -trial 2
-python testing.py -model cgnet -rois y -binary n -dataset mar28_ds2 -trial 2
-python testing.py -model cgnet -rois n -binary y -dataset mar28_ds2 -trial 2
-python testing.py -model cgnet -rois y -binary y -dataset mar28_ds2 -trial 2
+python testing_binary.py -model unet -rois n -trial 3
+python testing_binary.py -model cgnet -rois n -trial 3
 
 
 
-python testing.py -model unet -rois n -binary n -dataset mar28_ds3 -trial 3
-python testing.py -model unet -rois y -binary n -dataset mar28_ds3 -trial 3
-python testing.py -model unet -rois n -binary y -dataset mar28_ds3 -trial 3
-python testing.py -model unet -rois y -binary y -dataset mar28_ds3 -trial 3
+python testing.py -model unet -rois n -trial 1
+python testing.py -model unet -rois y -trial 1
+python testing.py -model cgnet -rois n -trial 1
+python testing.py -model cgnet -rois y -trial 1
 
-python testing.py -model cgnet -rois n -binary n -dataset mar28_ds3 -trial 3
-python testing.py -model cgnet -rois y -binary n -dataset mar28_ds3 -trial 3
-python testing.py -model cgnet -rois n -binary y -dataset mar28_ds3 -trial 3
-python testing.py -model cgnet -rois y -binary y -dataset mar28_ds3 -trial 3
+python testing.py -model unet -rois n -trial 2
+python testing.py -model unet -rois y -trial 2
+python testing.py -model cgnet -rois n -trial 2
+python testing.py -model cgnet -rois y -trial 2
+
+python testing.py -model unet -rois n -trial 3
+python testing.py -model unet -rois y -trial 3
+python testing.py -model cgnet -rois n -trial 3
+python testing.py -model cgnet -rois y -trial 3
+
+
+
+python testing_binary.py -model unet -rois y -trial 1
+python testing_binary.py -model cgnet -rois y -trial 1
+python testing_binary.py -model unet -rois y -trial 2
+python testing_binary.py -model cgnet -rois y -trial 2

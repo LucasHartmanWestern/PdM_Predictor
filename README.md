@@ -58,9 +58,6 @@ NEW IDEA:
 
 
 # -------- ICML Notes -------- #
-For all:
-- Write the sudo-code for the data generation algorithm tonight.
-- When running new models, train and test binary ROI models last.
 
 Experiment 1:
 - Compare VD (Vignette-Dilation) and RET (Root-Expansion-Tiling) approaches using candlstick graph.

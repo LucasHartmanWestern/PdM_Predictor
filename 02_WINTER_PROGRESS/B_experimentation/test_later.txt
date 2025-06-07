@@ -1,0 +1,2 @@
+python testing_binary.py -model unet -rois y -trial 3
+python testing_binary.py -model cgnet -rois y -trial 3

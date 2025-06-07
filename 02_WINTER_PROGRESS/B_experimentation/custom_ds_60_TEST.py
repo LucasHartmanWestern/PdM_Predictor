@@ -8,28 +8,30 @@ from torch.utils.data import Dataset
 from utils import get_dataset_path, fix_path
 
 
-class Custom_DS_60(Dataset):
-    def __init__(self, ds_folder_name: str, partition_name: str, binary_targets: bool):
-        assert partition_name in ['train', 'val', 'test'], "ERROR: Invalid partition name for custom dataset"
-        day_interval = 2 if partition_name == 'val' else 1
-
+class Custom_DS_60_TEST(Dataset):
+    def __init__(self, ds_folder_name: str, binary_targets: bool):
         # initialize private variables
-        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
         self.binary_targets = binary_targets
         self.x, self.y, self.day, self.hour = [], [], [], []
 
         # get dataset path and list name
-        main_dir = os.path.join(get_dataset_path(ds_folder_name), partition_name)
+        main_dir_1 = os.path.join(get_dataset_path(ds_folder_name), 'train')
+        main_dir_2 = os.path.join(get_dataset_path(ds_folder_name), 'val')
+        main_dir_3 = os.path.join(get_dataset_path(ds_folder_name), 'test')
         list_name = 'binary_list.txt' if binary_targets else 'multiclass_list.txt'
 
         # read list file and assign private variables
-        for line in open(os.path.join(main_dir, list_name), "r"):
-            x, y = fix_path(line).split(",")
-            if int(x.split("_")[1]) % day_interval == 0:
+        for dir_count, main_dir in enumerate([main_dir_1, main_dir_2, main_dir_3]):
+            for line in open(os.path.join(main_dir, list_name), "r"):
+                x, y = fix_path(line).split(",")
                 self.x.append(os.path.join(main_dir, x.strip()))
                 self.y.append(os.path.join(main_dir, y.strip()))
-                self.day.append(int(x.split("_")[1]))
+                day = int(x.split("_")[1])
+                self.day.append(day + (dir_count * 20))
                 self.hour.append(str(x.split("_")[2].split(".")[0]))
+                if day == 20:
+                    break
     
     def __len__(self):
         return len(self.x)
