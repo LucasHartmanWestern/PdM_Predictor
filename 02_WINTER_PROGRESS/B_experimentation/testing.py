@@ -73,7 +73,7 @@ def test(model, test_loader, save_path, n_classes):
         metrics_history["F1 Score"][class_idx] = []
         metrics_history["Jaccard Index"][class_idx] = []
 
-    model.to(device=torch.device('cuda:1' if torch.cuda.is_available() else 'cpu'))
+    model.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
 
     # --- iterate through all test samples --- #
     start_time = datetime.now()

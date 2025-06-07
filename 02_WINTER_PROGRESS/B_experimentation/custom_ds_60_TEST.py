@@ -11,7 +11,7 @@ from utils import get_dataset_path, fix_path
 class Custom_DS_60_TEST(Dataset):
     def __init__(self, ds_folder_name: str, binary_targets: bool):
         # initialize private variables
-        self.device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
         self.binary_targets = binary_targets
         self.x, self.y, self.day, self.hour = [], [], [], []
 

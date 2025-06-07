@@ -44,7 +44,7 @@ def test(model, test_loader, save_path, n_classes):
         "TP": [], "FP": [], "FN": [], "TN": []
     }
 
-    model.to(device=torch.device('cuda:1' if torch.cuda.is_available() else 'cpu'))
+    model.to(device=torch.device('cuda:0' if torch.cuda.is_available() else 'cpu'))
 
     # --- iterate through all test samples --- #
     start_time = datetime.now()
