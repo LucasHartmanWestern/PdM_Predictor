@@ -32,7 +32,7 @@ from modified_cgnet import Modified_CGNet
 # ---------- Logging Methods ---------- #
 
 def setup_basic_logger(save_path, log_name):
-    assert log_name in ['training', 'testing'], 'ERROR: incorrect log name input'
+    # assert log_name in ['training', 'testing'], 'ERROR: incorrect log name input'
     logging.basicConfig(
         filename=os.path.join(save_path, f'{log_name}.log'),
         filemode='w',
