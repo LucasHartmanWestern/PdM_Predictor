@@ -14,7 +14,7 @@ from custom_ds_60_TEST import Custom_DS_60_TEST
 
 # ---------- Helper Methods ---------- #
 
-def save_metrics_CSV(metrics_dict, save_path, n_classes):
+def save_metrics_CSV(metrics_dict, save_path, n_classes, scenario):
     # Create headers
     headers = ['Day', 'Hour']
     for metric_name in metrics_dict.keys():
@@ -23,7 +23,7 @@ def save_metrics_CSV(metrics_dict, save_path, n_classes):
                 headers.append(f'Class {class_idx} {metric_name}')
     
     # Create the CSV file
-    filepath = os.path.join(save_path, 'testing_metrics.csv')
+    filepath = os.path.join(save_path, f'{scenario}_testing_metrics.csv')
     open(filepath, 'w+').close()
     with open(filepath, 'w', newline='') as f:
         writer = csv.writer(f)
@@ -39,8 +39,8 @@ def save_metrics_CSV(metrics_dict, save_path, n_classes):
             writer.writerow(row)
 
 
-def create_metric_plots(metrics_dict, save_path, n_classes):
-    save_path = os.path.join(save_path, "testing_plots")
+def create_metric_plots(metrics_dict, save_path, n_classes, scenario):
+    save_path = os.path.join(save_path, f"{scenario}_testing_plots")
     os.makedirs(save_path, exist_ok=True)
 
     # per-class f1 score bar plot
@@ -62,7 +62,7 @@ def create_metric_plots(metrics_dict, save_path, n_classes):
 
 # ---------- Testing Method ---------- #
 
-def test(model, test_loader, save_path, n_classes):
+def test(model, test_loader, save_path, n_classes, scenario):
     metrics_history = {
         "Hour": [],
         "Day": [],
@@ -111,8 +111,8 @@ def test(model, test_loader, save_path, n_classes):
     log_and_print("\n{} testing complete.".format(datetime.now()))
     log_and_print("total testing time: {}".format(total_testing_time))
     log_and_print("{} saving metrics and generating plots...".format(datetime.now()))
-    save_metrics_CSV(metrics_history, save_path, n_classes)
-    create_metric_plots(metrics_history, save_path, n_classes)
+    save_metrics_CSV(metrics_history, save_path, n_classes, scenario)
+    create_metric_plots(metrics_history, save_path, n_classes, scenario)
     log_and_print("{} testing script finished.\n".format(datetime.now()))
 
 # ---------- Main Method ---------- #
@@ -139,21 +139,18 @@ if __name__ == "__main__":
     classes = 2 if binary_targets else 7
 
     # make extra testing folder for SMS and CGS
-    subfolder = ''
+    scenario = ''
     if dataset_name == 'mar28_ds4': # for SMS Testing
-        subfolder = 'SMS_Test_Results'
+        scenario = 'SMS'
     elif dataset_name == 'mar28_ds5': # for CGS Testing
-        subfolder = 'CGS_Test_Results'
+        scenario = 'CGS'
 
     # set up save path
     results_folder_name = f"{model_name}_{'rois' if use_rois else 'full'}_{'binary' if binary_targets else 'multiclass'}"
-    if subfolder != '':
-        save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name, subfolder)
-    else:
-        save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name)
+    save_location = os.path.join(".", "RESULTS", f"trial_{trial}", results_folder_name)
 
      # set up logger
-    setup_basic_logger(save_location, 'testing')
+    setup_basic_logger(save_location, f'testing_{scenario}')
     log_and_print(f"\n--- Testing {results_folder_name} ---\n")
 
     # set up data loaders
@@ -170,4 +167,4 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load(os.path.join(save_location, "best_weights.pth"), weights_only=True))
 
     # test model
-    test(model, test_ds_loader, save_location, classes)
+    test(model, test_ds_loader, save_location, classes, scenario)
