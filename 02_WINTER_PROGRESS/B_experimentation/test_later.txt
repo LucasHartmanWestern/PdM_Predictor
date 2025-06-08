@@ -1,4 +1,7 @@
-python training.py -model unet -rois y -binary y -dataset mar28_ds3 -epochs 25 -patience 10 -trial 3
-python testing_binary.py -model unet -rois y -trial 3
 python training.py -model cgnet -rois y -binary y -dataset mar28_ds3 -epochs 25 -patience 10 -trial 3
-python testing_binary.py -model cgnet -rois y -trial 3
+python testing_binary.py -model cgnet -rois y -dataset mar28_ds4 -trial 3
+python testing_binary.py -model cgnet -rois y -dataset mar28_ds5 -trial 3
+
+python training.py -model unet -rois y -binary y -dataset mar28_ds3 -epochs 25 -patience 10 -trial 3
+python testing_binary.py -model unet -rois y -dataset mar28_ds4 -trial 3
+python testing_binary.py -model unet -rois y -dataset mar28_ds5 -trial 3
