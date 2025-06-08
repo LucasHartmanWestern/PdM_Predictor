@@ -16,7 +16,7 @@ if __name__ == "__main__":
     
     # BINARY
     target_type = 'binary'
-    headers = ['CNN Model', 'Input Type', 'Target Type', 'Trial', 'Day', 'Hour', 'F1 Score', 'Jaccard Index', 'TP', 'FP', 'FN', 'TN']
+    headers = ['CNN Model', 'Input Type', 'Target Type', 'Trial', 'Day', 'Hour', 'F1 Score', 'TP', 'FP', 'FN', 'TN']
     df = pd.DataFrame(columns=headers)
     for trial in range(1, 4):
         for model in MODELS:
@@ -26,10 +26,12 @@ if __name__ == "__main__":
                     print(f"File not found: {csv_path}")
                     continue
                 current_df = pd.read_csv(csv_path)
+                current_df.drop(columns=['Jaccard Index'], inplace=True)
                 current_df['CNN Model'] = model
                 current_df['Input Type'] = input_type
                 current_df['Target Type'] = target_type
                 current_df['Trial'] = trial
+                current_df.rename(columns={'Day': 'Hour', 'Hour': 'Day'}, inplace=True)
                 current_df = current_df[headers]
                 df = pd.concat([df, current_df], ignore_index=True)
     df.to_csv(os.path.join(save_folder, 'CGS_binary_results.csv'), index=False)
@@ -50,14 +52,7 @@ if __name__ == "__main__":
                'Class 3 F1 Score', 
                'Class 4 F1 Score', 
                'Class 5 F1 Score', 
-               'Class 6 F1 Score',
-               'Class 0 Jaccard Index', 
-               'Class 1 Jaccard Index', 
-               'Class 2 Jaccard Index', 
-               'Class 3 Jaccard Index', 
-               'Class 4 Jaccard Index', 
-               'Class 5 Jaccard Index', 
-               'Class 6 Jaccard Index']
+               'Class 6 F1 Score']
     df = pd.DataFrame(columns=headers)
     for trial in range(1, 4):
         for model in MODELS:
@@ -67,6 +62,14 @@ if __name__ == "__main__":
                     print(f"File not found: {csv_path}")
                     continue
                 current_df = pd.read_csv(csv_path)
+                current_df.drop(columns=[
+                    'Class 0 Jaccard Index', 
+                    'Class 1 Jaccard Index', 
+                    'Class 2 Jaccard Index', 
+                    'Class 3 Jaccard Index', 
+                    'Class 4 Jaccard Index', 
+                    'Class 5 Jaccard Index', 
+                    'Class 6 Jaccard Index'], inplace=True)
                 current_df['CNN Model'] = model
                 current_df['Input Type'] = input_type
                 current_df['Target Type'] = target_type

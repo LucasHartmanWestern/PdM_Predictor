@@ -65,6 +65,10 @@ Experiment 1:
     -> Ensure this works for any plots and CSV files that get saved
 
 
+- Problem: SMS datasets only consider a single hour on day 20, 40 and 60! Please fix!
+- Generally need to clean up all ICML related code...
+
+
 
 
 
